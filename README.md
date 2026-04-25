@@ -584,37 +584,6 @@ MAX_QUESTIONS_PER_SKILL=3
 
 ---
 
-## ☁️ Deployment (Streamlit Cloud)
-
-1. Push your code to GitHub (already done).
-2. Go to [share.streamlit.io](https://share.streamlit.io).
-3. Click **"New App"** and select your repository.
-4. Set the main file to `main.py`.
-5. In **"Advanced settings" → Secrets**, paste the contents of your `.env` file.
-6. Click **"Deploy"**.
-
-Your app will be live at `https://your-app-name.streamlit.app`.
-
----
-
-## 🔒 Security
-
-- **`.env` is gitignored**: Your API keys are never committed to version control.
-- **`.env.example` contains only placeholders**: Safe for public repositories.
-- **GitHub Push Protection**: The repository has been verified to contain no secrets.
-- **Streamlit Secrets**: On deployment, keys are stored securely in Streamlit's encrypted secrets manager.
-
----
-
-## 🤝 Contributing
-
-1. Fork the repository.
-2. Create a feature branch: `git checkout -b feature/amazing-feature`.
-3. Commit your changes: `git commit -m "Add amazing feature"`.
-4. Push to the branch: `git push origin feature/amazing-feature`.
-5. Open a Pull Request.
-
----
 
 ## 📜 License
 
