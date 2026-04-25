@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+
+# Environment Variables (IMPORTANT: DO NOT REMOVE)
+.env
+
+# Streamlit
+.streamlit/
+static/
+
+# Artifacts & Local Data
+output/
+scratch/
+*.pdf
+*.json
+
+# OS
+.DS_Store
+Thumbs.db

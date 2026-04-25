@@ -1,0 +1,20 @@
+Role: Backend Python Engineer
+Level: Mid to Senior (3-5 years)
+Company: FinTech Startup
+
+About the role:
+We are looking for a Backend Python Engineer to join our fast-growing fintech startup. You will be building highly concurrent, scalable systems to process financial transactions in real time.
+
+Required Skills:
+- Python (Expert): Deep understanding of modern Python (3.11+), asyncio, and performance optimization.
+- FastAPI (Strong): We build all our microservices using FastAPI.
+- PostgreSQL (Strong): Complex queries, optimization, and transaction management.
+- Docker (Required): You must be able to containerize applications and manage local dev environments.
+- Redis (Familiar): Used for caching and pub/sub.
+- AWS (Familiar): Basic understanding of EC2, S3, and IAM.
+- System Design (Strong): Ability to design scalable, resilient distributed systems.
+
+Nice-to-have Skills:
+- Celery
+- Kubernetes
+- GraphQL

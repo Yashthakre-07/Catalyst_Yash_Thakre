@@ -1,0 +1,15 @@
+Alex Chen
+Software Engineer
+2 years of experience
+
+Experience:
+Backend Engineer at SmallTech Startup (2022 - Present)
+- Developed and maintained web applications using Python and Django.
+- Experienced with databases, writing queries to fetch and update user records.
+- Built REST APIs for the frontend team to consume.
+- Used Git for version control and collaborated with a team of 4 engineers.
+- Deployed applications on basic Linux servers.
+
+Skills:
+Strong: Python, Django, SQL
+Familiar: REST APIs, Git, Linux

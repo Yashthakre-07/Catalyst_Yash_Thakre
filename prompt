@@ -1,0 +1,609 @@
+You are a senior AI engineer at a top-tier tech company. I need you to build a 
+complete, production-grade AI agent for a hackathon — judged by engineers who 
+will read every line of code.
+
+═══════════════════════════════════════════
+ROLE & MINDSET
+═══════════════════════════════════════════
+You are NOT a code generator. You are a Staff Engineer who:
+- Makes deliberate architecture decisions and documents WHY
+- Writes code that junior engineers can read and learn from
+- Never takes shortcuts that create technical debt
+- Thinks about edge cases before writing a single line
+- Treats every function like it will run in production at 10,000 req/min
+
+═══════════════════════════════════════════
+PROBLEM STATEMENT
+═══════════════════════════════════════════
+Build an AI-Powered Skill Assessment & Personalised Learning Plan Agent.
+
+INPUT:
+- A Job Description (JD) — pasted text or uploaded PDF
+- A Candidate Resume — pasted text or uploaded PDF
+
+WHAT IT DOES (in order):
+1. Parses both documents using structured extraction
+2. Extracts required skills from JD with required proficiency levels (1-10)
+3. Conversationally assesses the candidate's REAL proficiency on each skill
+   (not what the resume claims — what they actually know)
+4. Scores each skill with reasoning
+5. Identifies skill gaps with priority ranking
+6. Generates a personalised week-by-week learning plan with:
+   - Real curated resources (actual URLs)
+   - Time estimates per skill
+   - Focus on adjacent skills the candidate can realistically acquire fast
+
+═══════════════════════════════════════════
+JUDGING CRITERIA — OPTIMISE EVERYTHING AROUND THIS
+═══════════════════════════════════════════
+1. End-to-end functionality          — 20%
+2. Quality of the core agent         — 25%  ← THIS IS THE PRIZE CRITERION
+3. Quality of output produced        — 20%
+4. Technical implementation quality  — 15%
+5. Innovation & creativity           — 10%
+6. UX polish                         — 5%
+7. Clean, documented code            — 5%
+
+Every design decision must serve criterion #2 first.
+
+═══════════════════════════════════════════
+AI PROVIDER — FLEXIBLE SETUP (IMPORTANT)
+═══════════════════════════════════════════
+The AI backend must support TWO providers via a single config switch:
+
+OPTION A — Google Gemini (default, free tier available)
+  Library:  google-generativeai
+  Model:    gemini-1.5-flash   (fast, free tier)
+            gemini-1.5-pro     (better quality, use if available)
+  API Key:  GEMINI_API_KEY in .env
+  Get key:  aistudio.google.com (completely free)
+
+OPTION B — Groq (ultra-fast inference, free tier available)
+  Library:  groq
+  Model:    llama-3.3-70b-versatile   (best quality on Groq)
+            mixtral-8x7b-32768        (fallback)
+  API Key:  GROQ_API_KEY in .env
+  Get key:  console.groq.com (free, generous limits)
+
+SWITCHING BETWEEN PROVIDERS:
+  In .env file:
+    AI_PROVIDER=gemini    # or "groq"
+    GEMINI_API_KEY=your_key_here
+    GROQ_API_KEY=your_key_here
+    AI_MODEL=gemini-1.5-flash   # overridable
+
+  In config/settings.py:
+    Read AI_PROVIDER and load the correct client.
+    Expose a single get_ai_client() function so the rest of
+    the codebase never imports provider-specific code directly.
+
+UNIFIED AI WRAPPER — build this in utils/ai_client.py:
+  
+  class AIClient:
+      """
+      Unified wrapper around Gemini and Groq APIs.
+      The rest of the codebase only calls this — never raw SDKs.
+      """
+      
+      def __init__(self, provider: str, model: str, api_key: str):
+          ...
+      
+      def complete(
+          self,
+          system_prompt: str,
+          user_message: str,
+          temperature: float = 0.3,
+          max_tokens: int = 2000,
+      ) -> str:
+          """
+          Single unified method for text completion.
+          Handles provider differences internally.
+          Returns raw text string (caller handles JSON parsing).
+          """
+          ...
+      
+      def complete_with_retry(
+          self,
+          system_prompt: str,
+          user_message: str,
+          max_retries: int = 3,
+      ) -> str:
+          """
+          Wraps complete() with exponential backoff retry.
+          On JSON parse failure, appends correction message and retries.
+          """
+          ...
+
+  Implementation notes:
+    Gemini: use genai.GenerativeModel(model).generate_content(...)
+            Pass system_prompt as system_instruction parameter
+    Groq:   use groq_client.chat.completions.create(...)
+            Pass system_prompt as {"role": "system", "content": ...}
+    Both return .text or .choices[0].message.content respectively.
+    Normalize to always return a plain string.
+
+═══════════════════════════════════════════
+MANDATORY TECH STACK
+═══════════════════════════════════════════
+- Language:        Python 3.11
+- AI Backend:      Google Gemini OR Groq (see above — your choice via .env)
+                   Raw SDK only. NO LangChain. NO LlamaIndex. NO AutoGen.
+                   Build the agent loop manually.
+- PDF Parsing:     PyMuPDF (fitz)
+- Data Validation: Pydantic v2 models
+- UI:              Streamlit — clean, minimal, professional
+- Config:          python-dotenv
+- Logging:         loguru
+- HTTP:            httpx
+- State:           st.session_state + JSON files
+
+═══════════════════════════════════════════
+EXACT FOLDER STRUCTURE
+═══════════════════════════════════════════
+
+skill-assessment-agent/
+│
+├── main.py
+├── requirements.txt
+├── .env.example
+├── .gitignore
+├── GUIDELINES.md
+├── README.md
+│
+├── agent/
+│   ├── __init__.py
+│   ├── core.py
+│   ├── assessor.py
+│   ├── planner.py
+│   ├── scorer.py
+│   └── prompts.py            ← ALL prompts. Nowhere else.
+│
+├── parsers/
+│   ├── __init__.py
+│   ├── resume_parser.py
+│   └── jd_parser.py
+│
+├── models/
+│   ├── __init__.py
+│   ├── candidate.py
+│   ├── skill.py
+│   └── learning_plan.py
+│
+├── config/
+│   ├── __init__.py
+│   └── settings.py
+│
+├── utils/
+│   ├── __init__.py
+│   ├── ai_client.py          ← NEW: unified AI wrapper (Gemini + Groq)
+│   ├── logger.py
+│   ├── file_handler.py
+│   └── resource_finder.py
+│
+├── data/
+│   ├── sample_jd.txt
+│   ├── sample_resume.txt
+│   └── skill_resources.json
+│
+└── outputs/
+    └── .gitkeep
+
+═══════════════════════════════════════════
+THE FOUR AGENT PHASES
+═══════════════════════════════════════════
+
+PHASE 1 — PARSE
+  resume_parser.py extracts:
+    - Candidate full name
+    - Skills mentioned (with implicit proficiency estimate)
+    - Years of total experience
+    - Most recent role title
+
+  jd_parser.py extracts:
+    - Required skills (with required proficiency level 1-10)
+    - Nice-to-have skills
+    - Role seniority level
+    - Domain context
+
+PHASE 2 — CONVERSATIONAL ASSESSMENT (THE CORE — 25% of score)
+  For EACH required skill from the JD:
+
+  Step A — Calibrate (Question 1):
+    Broad, easy question to find baseline.
+    E.g. for Docker: "How long have you been using Docker and
+    what's the most complex thing you've containerised so far?"
+
+  Step B — Probe depth (Question 2):
+    Based on answer, go one level harder.
+    Strong answer → probe trade-offs, internals, failure modes.
+    Weak answer → confirm gap gently, prepare to score low.
+
+  Step C — Find ceiling (Question 3, optional):
+    Only if still ambiguous. One specific technical question.
+    E.g. "What's the difference between CMD and ENTRYPOINT,
+    and when would you use each?"
+
+  CONVERSATION RULES:
+    - Hard limit: 3 questions per skill maximum
+    - Never say "wrong", "incorrect", "that's not right"
+    - Vague answer → "Interesting — can you walk me through
+      a specific example of that?"
+    - Candidate says they don't know → acknowledge gracefully,
+      score appropriately, move on immediately
+    - Between skills: transition naturally
+      "Got it, thanks. Let's talk about Redis now."
+    - Final message after all skills:
+      "That covers everything I wanted to ask. Really appreciate
+       your time — generating your personalised plan now..."
+    - Tone: Staff Engineer doing a casual technical screen.
+      NOT an HR bot. NOT a quiz. A conversation.
+
+PHASE 3 — GAP ANALYSIS
+  scorer.py:
+    - gap_score = required_level - assessed_level
+    - Categories:
+        STRONG:     assessed >= 8
+        DEVELOPING: assessed 5-7
+        GAP:        assessed <= 4
+    - Adjacent skill detection (build this map):
+        Django → FastAPI (same Python web ecosystem)
+        SQL → PostgreSQL specifics
+        React → Next.js
+        Python → FastAPI
+        Linux → Docker
+        AWS basics → specific AWS services
+        REST APIs → GraphQL
+    - Priority formula:
+        priority_score = (gap_score * 0.6) + (business_criticality * 0.4)
+        business_criticality: 10 if "required", 5 if "nice-to-have"
+
+PHASE 4 — LEARNING PLAN
+  planner.py:
+    - GAP skills: 3 resources (course + article + project)
+    - DEVELOPING skills: 1 resource to reach next level
+    - STRONG skills: listed in summary, no plan needed
+    - Time estimates:
+        Gap 1-3: 1-2 weeks
+        Gap 4-6: 3-5 weeks
+        Gap 7+:  6-10 weeks
+    - Week-by-week breakdown — specific and actionable:
+        "Week 1: Complete FastAPI tutorial sections 1-5,
+         build a basic CRUD API with 3 endpoints"
+        "Week 2: Add JWT authentication, write unit tests"
+    - Total plan: 4-12 weeks hard cap
+    - Summary: personalised paragraph mentioning candidate by name,
+      their specific strengths, and what unlocks for them after the plan
+
+═══════════════════════════════════════════
+PYDANTIC MODELS — USE THESE EXACTLY
+═══════════════════════════════════════════
+
+# models/skill.py
+class SkillAssessment(BaseModel):
+    skill_name: str
+    required_level: int
+    claimed_level: int
+    assessed_level: int
+    gap_score: int
+    category: Literal["STRONG", "DEVELOPING", "GAP"]
+    assessment_reasoning: str
+
+# models/candidate.py
+class CandidateProfile(BaseModel):
+    name: str
+    current_role: str
+    years_experience: int
+    skills_from_resume: list[str]
+    resume_text: str
+
+# models/learning_plan.py
+class Resource(BaseModel):
+    title: str
+    url: str
+    type: Literal["course", "article", "project", "book", "video"]
+    estimated_hours: int
+    why_recommended: str
+
+class SkillPlan(BaseModel):
+    skill_name: str
+    current_level: int
+    target_level: int
+    resources: list[Resource]
+    estimated_weeks: int
+    weekly_breakdown: list[str]
+    adjacent_to: Optional[str] = None
+
+class LearningPlan(BaseModel):
+    candidate_name: str
+    target_role: str
+    assessment_date: str
+    total_duration_weeks: int
+    skill_plans: list[SkillPlan]
+    priority_order: list[str]
+    skills_strong: list[str]
+    summary: str
+
+═══════════════════════════════════════════
+PROMPTS — ALL IN agent/prompts.py
+═══════════════════════════════════════════
+
+4 prompts as Python string constants with f-string slots.
+
+IMPORTANT NOTE FOR GEMINI/GROQ:
+  These models follow JSON instructions well but sometimes add
+  markdown fences. The AIClient wrapper must strip ```json and ```
+  before parsing. Handle this in complete_with_retry().
+
+SKILL_EXTRACTOR_PROMPT
+  Input slots: {jd_text}
+  Output: JSON array of skill objects with fields:
+    skill_name, required_level (1-10), is_required (bool),
+    context (why it's needed based on JD)
+
+ASSESSOR_PROMPT
+  Input slots: {skill_name}, {candidate_background},
+               {conversation_so_far}, {question_number}
+  Output: JSON with either:
+    {"type": "question", "content": "the question text"}
+    {"type": "complete", "reason": "why we have enough data"}
+  Tone instruction in prompt:
+    "You are a Staff Engineer at a tech company doing a casual
+     technical screen. You are curious and encouraging, not
+     testing — exploring. Your questions are conversational,
+     not multiple choice. You never make the candidate feel stupid."
+
+SCORER_PROMPT
+  Input slots: {skill_name}, {required_level}, {claimed_level},
+               {full_qa_transcript}
+  Output: Full SkillAssessment JSON
+
+PLANNER_PROMPT
+  Input slots: {candidate_profile_json}, {skill_assessments_json},
+               {target_role}, {available_resources_json}
+  Output: Full LearningPlan JSON
+  Special instruction in prompt:
+    "The weekly_breakdown must be specific — mention actual
+     resource names, chapters, or project milestones.
+     The summary must mention the candidate by name and
+     reference at least 2 of their specific strengths."
+
+ALL PROMPTS END WITH THIS EXACT LINE:
+  "Respond ONLY in valid JSON. No explanation outside the JSON.
+   No markdown code blocks. No preamble. Start your response
+   with { or [ and end with } or ]."
+
+═══════════════════════════════════════════
+STREAMLIT UI
+═══════════════════════════════════════════
+
+SIDEBAR — SETUP
+  - st.file_uploader for resume PDF
+  - st.text_area for resume paste (if no PDF)
+  - st.text_area for job description
+  - st.selectbox: "AI Provider" → Gemini / Groq
+    (reads from session but can be overridden here)
+  - st.button "Start Assessment" — disabled until inputs present
+  - After parsing: collapsible preview of extracted skills
+
+MAIN AREA — ASSESSMENT
+  Progress: "Assessing skill 3 of 7: Docker" + st.progress()
+  
+  Chat interface:
+    st.chat_message("assistant") for agent
+    st.chat_message("user") for candidate
+    st.chat_input() for responses
+  
+  Live scorecard (updates as each skill completes):
+    Python    ████████░░  8/10  STRONG      ← green
+    FastAPI   █████░░░░░  5/10  DEVELOPING  ← yellow
+    Docker    ██░░░░░░░░  2/10  GAP         ← red
+
+RESULTS SECTION
+  Title: "Your Personalised Learning Plan"
+  Subtitle: "Estimated: X weeks | Y skills to develop"
+  
+  Horizontal bar chart:
+    Two bars per skill: Required (grey) vs Your Level (colored)
+    Use st.bar_chart or matplotlib
+  
+  One st.expander per skill:
+    Title: "[GAP] Docker — 4 weeks"
+    Body: resource cards + weekly breakdown table
+  
+  Download: "Download Learning Plan (JSON)"
+    Write to outputs/ directory, serve via st.download_button
+
+UI RULES:
+  - st.set_page_config(layout="wide")
+  - st.spinner("Thinking...") on ALL AI calls
+  - No raw JSON visible to user ever
+  - Color-coded consistently throughout
+
+═══════════════════════════════════════════
+SESSION STATE SCHEMA
+═══════════════════════════════════════════
+
+Initialize all keys at app startup:
+
+{
+  "phase": "setup",
+  "ai_provider": "gemini",
+  "jd_text": "",
+  "resume_text": "",
+  "candidate_profile": None,
+  "required_skills": [],
+  "current_skill_index": 0,
+  "current_skill_questions": 0,
+  "conversation_history": {},
+  "skill_assessments": [],
+  "learning_plan": None,
+  "messages": [],
+}
+
+═══════════════════════════════════════════
+ERROR HANDLING
+═══════════════════════════════════════════
+
+AI calls:
+  - 3 retries, exponential backoff: 2s → 4s → 8s
+  - On JSON parse failure: append to prompt:
+    "Your last response was not valid JSON. Reply with ONLY
+     valid JSON starting with { or [. Nothing else."
+    Then retry.
+  - Strip markdown fences before every JSON parse:
+    text.strip().lstrip("```json").lstrip("```").rstrip("```").strip()
+  - Gemini-specific: handle SAFETY block responses gracefully
+  - Groq-specific: handle rate limit (429) with longer backoff
+
+File operations:
+  - PDF: handle fitz exceptions, empty files, password protection
+  - JSON: handle malformed data with defaults
+  - Always validate Pydantic model — never trust raw dicts
+
+═══════════════════════════════════════════
+SAMPLE DATA
+═══════════════════════════════════════════
+
+data/sample_jd.txt — Backend Python Engineer at fintech startup:
+  Required: Python (expert), FastAPI (strong), PostgreSQL (strong),
+  Docker (required), Redis (familiar), AWS (familiar),
+  System Design (strong)
+  Nice-to-have: Celery, Kubernetes, GraphQL
+  Level: Mid to Senior (3-5 years)
+  Write as a real job description, not a bullet list.
+
+data/sample_resume.txt — Creates interesting gaps:
+  Name: Alex Chen
+  2 years experience at a small startup
+  Strong: Python, Django (NOT FastAPI — probes this gap), basic SQL
+  Some: REST APIs, Git, basic Linux
+  None: Docker, Redis, AWS, system design at scale
+  Resume says "experienced with databases" — vague, good to probe
+
+data/skill_resources.json — Real URLs:
+  Skills: Python, FastAPI, PostgreSQL, Docker, Redis,
+          AWS, System Design, Django, React, Node.js
+  3 resources each: course + docs + project idea
+  Sources: roadmap.sh, official docs, freeCodeCamp,
+           "Designing Data-Intensive Applications",
+           Fireship on YouTube
+
+═══════════════════════════════════════════
+requirements.txt
+═══════════════════════════════════════════
+
+google-generativeai>=0.5.0
+groq>=0.9.0
+streamlit>=1.35.0
+pydantic>=2.7.0
+pymupdf>=1.24.0
+python-dotenv>=1.0.0
+loguru>=0.7.2
+httpx>=0.27.0
+pandas>=2.2.0
+matplotlib>=3.8.0
+
+═══════════════════════════════════════════
+.env.example
+═══════════════════════════════════════════
+
+# Choose your AI provider: "gemini" or "groq"
+AI_PROVIDER=gemini
+
+# Google Gemini (free at aistudio.google.com)
+GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_MODEL=gemini-1.5-flash
+
+# Groq (free at console.groq.com)
+GROQ_API_KEY=your_groq_api_key_here
+GROQ_MODEL=llama-3.3-70b-versatile
+
+# App config
+LOG_LEVEL=INFO
+MAX_QUESTIONS_PER_SKILL=3
+
+═══════════════════════════════════════════
+GUIDELINES.md — REQUIRED SECTIONS
+═══════════════════════════════════════════
+
+1. Agent Overview (3 sentences)
+
+2. Architecture Decisions Table:
+   | Decision | Alternative | Why We Chose This |
+   Cover: provider-agnostic AI wrapper, raw SDK, Pydantic v2,
+   Streamlit, JSON state, PyMuPDF, manual retry logic
+
+3. Data Flow (ASCII):
+   JD + Resume → [Parser] → CandidateProfile + RequiredSkills
+   → [Assessor Loop] → ConversationHistory per skill
+   → [Scorer] → SkillAssessment[]
+   → [Planner] → LearningPlan
+   → [UI] → User
+
+4. Why raw SDK over LangChain
+
+5. Why provider-agnostic wrapper (Gemini vs Groq tradeoffs):
+   Gemini 1.5 Flash: better reasoning, free tier, slightly slower
+   Groq LLaMA 3.3 70B: extremely fast, great for chat-style, free
+
+6. Scoring algorithm explanation
+
+7. How to add new skills to resource database
+
+8. How to add a third AI provider (e.g. OpenAI) to AIClient
+
+9. Environment variables reference
+
+═══════════════════════════════════════════
+BUILD SEQUENCE — STRICT ORDER
+═══════════════════════════════════════════
+
+PHASE 1 — Foundation
+  Files: .env.example, config/settings.py, utils/ai_client.py,
+         models/, parsers/, data files
+  Test: python utils/ai_client.py → sends one test prompt,
+        prints response. Confirms provider works.
+        python parsers/test_parse.py → prints extracted skills.
+
+PHASE 2 — Agent Brain
+  Files: agent/prompts.py, agent/assessor.py, agent/scorer.py
+  Test: python agent/test_assess.py → runs one skill assessment
+        in terminal, prints SkillAssessment JSON.
+
+PHASE 3 — Planner
+  Files: utils/resource_finder.py, agent/planner.py
+  Test: python agent/test_plan.py → prints full LearningPlan JSON.
+
+PHASE 4 — Orchestration
+  Files: agent/core.py
+  Test: python agent/core.py → full pipeline, prints summary.
+
+PHASE 5 — Streamlit UI
+  Files: main.py, utils/logger.py, utils/file_handler.py
+  Test: streamlit run main.py → full end-to-end in browser.
+
+PHASE 6 — Hardening
+  Add retry logic, error handling, loguru to everything.
+  Test: simulate API failure → confirm retry + graceful fallback.
+
+═══════════════════════════════════════════
+YOUR OPERATING RULES FOR THIS SESSION
+═══════════════════════════════════════════
+
+1. Build PHASE 1 ONLY. Show all files. Wait for "next".
+2. Never build two phases at once.
+3. Every function: docstring with Args/Returns, type annotations.
+4. No hardcoded API keys. Ever. Only from settings.py.
+5. After each phase: give exact terminal commands to test it.
+6. When you make a decision not specified here, state it
+   explicitly and add it to GUIDELINES.md.
+7. The AIClient wrapper must work identically for both providers.
+   The agent code must never know which provider is being used.
+8. Strip markdown fences in AIClient before every JSON parse.
+   This is the #1 cause of failures with Gemini/Groq — handle it.
+9. The assessment conversation is the product. It must feel like
+   talking to a thoughtful senior engineer. Not a quiz. Not a form.
+10. Final check before declaring done: read every file and ask
+    "would I be proud to show this at a Google interview?"
+
+Start now. Build Phase 1. Show me every file.
