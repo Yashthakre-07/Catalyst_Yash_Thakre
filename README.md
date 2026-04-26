@@ -76,44 +76,125 @@ The entire experience is wrapped in a **cinematic "Neural Dark" UI** with glassm
 
 ---
 
-## 🏗 Architecture & How It Works
+## 🏗 Architecture & Total Process Flow
 
+NeuralHire relies on a highly modular, decoupled architecture where the Streamlit UI, the Core Orchestrator (`AssessmentAgent`), the 4-Phase pipeline modules, and the multi-provider LLM backend operate together seamlessly.
+
+### The System Architecture Diagram
+
+```mermaid
+graph TD
+    %% Custom Styling for Neural Dark Theme
+    classDef userNode fill:#020617,stroke:#10B981,stroke-width:2px,color:#F8FAFC
+    classDef uiLayer fill:#0F172A,stroke:#7C6AF7,stroke-width:2px,color:#F8FAFC
+    classDef coreEngine fill:#1E293B,stroke:#F59E0B,stroke-width:2px,color:#F8FAFC
+    classDef pipelineLayer fill:#334155,stroke:#3B82F6,stroke-width:1px,color:#F8FAFC
+    classDef backendLayer fill:#020617,stroke:#EF4444,stroke-width:2px,stroke-dasharray: 5 5,color:#F8FAFC
+    classDef outputLayer fill:#475569,stroke:#10B981,stroke-width:2px,color:#F8FAFC
+
+    %% User Interaction
+    U((Candidate / User)):::userNode
+    
+    %% Streamlit UI Layer
+    subgraph UILayer ["🌐 Frontend Layer (Streamlit)"]
+        direction LR
+        Step1[Hero & Auth]:::uiLayer --> Step2[JD Upload]:::uiLayer
+        Step2 --> Step3[Resume Upload]:::uiLayer
+        Step3 --> Step4[Live Assessment Chat]:::uiLayer
+        Step4 --> Step5[Results Dashboard]:::uiLayer
+    end
+    
+    U --> Step1
+    
+    %% Core Engine
+    subgraph OrchestratorLayer ["🧠 Core Orchestrator"]
+        Agent{AssessmentAgent}:::coreEngine
+    end
+    
+    Step3 -- Passes Documents --> Agent
+    Step4 <--> |Context & Next Q| Agent
+    Agent -- Sends Final Data --> Step5
+
+    %% 4-Phase Pipeline Modules
+    subgraph PipelineLayer ["⚙️ The 4-Phase Intelligence Pipeline"]
+        direction TB
+        P1["Phase 1: Document Intelligence<br>(Parsers)"]:::pipelineLayer
+        P2["Phase 2: Tech Screening<br>(Assessor)"]:::pipelineLayer
+        P3["Phase 3: Deep Evaluation<br>(Scorer)"]:::pipelineLayer
+        P4["Phase 4: Roadmap Generation<br>(Planner)"]:::pipelineLayer
+        
+        P1 --> P2 --> P3 --> P4
+    end
+
+    Agent <--> |Orchestrates| PipelineLayer
+
+    %% AI Engine & Rotation
+    subgraph AIBackend ["⚡ AI Engine & Multi-Key Routing"]
+        Client{AIClient Manager}:::backendLayer
+        
+        subgraph GroqKeys ["Groq API Keys (Primary)"]
+            G1[Key 1]:::backendLayer
+            G2[Key 2]:::backendLayer
+            G3[Key N...]:::backendLayer
+        end
+        
+        subgraph GeminiKeys ["Gemini API Keys (Fallback)"]
+            Gem1[Key 1]:::backendLayer
+            Gem2[Key 2]:::backendLayer
+            Gem3[Key N...]:::backendLayer
+        end
+        
+        Client -->|Priority| GroqKeys
+        Client -->|Failover| GeminiKeys
+        GroqKeys -.->|Rate Limit / 429| GeminiKeys
+    end
+
+    PipelineLayer --> |Prompts & Schemas| AIBackend
+    AIBackend --> |Structured JSON Response| PipelineLayer
+    
+    %% Output & Artifacts
+    subgraph OutputLayer ["📥 Artifact Generation"]
+        PDF["Dark-Themed PDF Report"]:::outputLayer
+        Resources["Curated Video/Docs Grids"]:::outputLayer
+    end
+    
+    Step5 --> PDF
+    Step5 --> Resources
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        STREAMLIT UI (main.py)                   │
-│  Hero → JD Upload → Resume Upload → Assessment Chat → Results  │
-└────────────────────────────┬────────────────────────────────────┘
-                             │
-                    ┌────────▼────────┐
-                    │  AssessmentAgent │  ← Central Orchestrator
-                    │   (agent/core)  │
-                    └──┬───┬───┬───┬──┘
-                       │   │   │   │
-              ┌────────┘   │   │   └────────┐
-              ▼            ▼   ▼            ▼
-        ┌──────────┐ ┌────────┐ ┌───────┐ ┌─────────┐
-        │  Parsers │ │Assessor│ │Scorer │ │ Planner │
-        │ (resume, │ │  (Q&A) │ │(1-10) │ │(roadmap)│
-        │   jd)    │ │        │ │       │ │         │
-        └────┬─────┘ └───┬────┘ └───┬───┘ └────┬────┘
-             │            │         │           │
-             └────────────┼─────────┼───────────┘
-                          ▼         ▼
-                    ┌─────────────────────┐
-                    │     AIClient        │
-                    │  (Multi-Key Rotation│
-                    │   Gemini + Groq)    │
-                    └─────────────────────┘
-```
 
-### Flow Summary
+### 🔄 The Total Process: Step-by-Step
 
-1. **User** uploads a Job Description and Resume via the Streamlit UI.
-2. **`AssessmentAgent`** (the central orchestrator) calls the **Parsers** to extract structured data.
-3. For each extracted skill, the **Assessor** generates adaptive interview questions.
-4. After the conversation, the **Scorer** evaluates the candidate's proficiency.
-5. Finally, the **Planner** generates a personalized learning roadmap.
-6. The **Results Dashboard** renders everything in a cinematic UI, with an option to **export as PDF**.
+**1. The Ingestion Phase (User → UI)**
+* The User arrives at the cinematic Hero page and authenticates (if login is enabled).
+* The User uploads two critical pieces of data: a **Job Description** (representing the requirement) and a **Resume** (representing the current state).
+
+**2. The Intelligence Extraction (UI → Parsers)**
+* The `AssessmentAgent` invokes the **Resume Parser** and **JD Parser**.
+* The **Resume Parser** converts the unstructured resume into a Pydantic `CandidateProfile` (extracting years of experience, current role, and existing skills).
+* The **JD Parser** isolates specific, measurable skills from the JD, assigning them a "required level" (1-10) and noting their criticality. 
+* *All calls are routed through the multi-key `AIClient` which automatically parses the LLM output into strict JSON.*
+
+**3. The Adaptive Live Interview (Assessor ↔ User)**
+* The system transitions the User to the **Live Assessment Chat**.
+* For *each* skill identified from the JD, the `AssessmentAgent` triggers the **Assessor**.
+* The **Assessor** looks at the candidate's profile and previous conversation history to generate a highly targeted technical question.
+* The User answers in the Streamlit UI. The response goes back to the **Assessor**, which generates the *next* contextual question. 
+* This loops exactly 3 times per skill (or up to `MAX_QUESTIONS_PER_SKILL`).
+
+**4. The Deep Evaluation (Scorer)**
+* Once the 3-question loop for a skill completes, the entire transcript is sent to the **Scorer**.
+* The **Scorer** analyzes the depth, correctness, and problem-solving ability in the user's answers.
+* It assigns a definitive proficiency score (1-10) and flags the skill as either `STRONG`, `DEVELOPING`, or `GAP`.
+* A Priority Score is calculated to determine how urgently this skill needs to be learned based on the job's strict requirements.
+
+**5. The Curriculum Masterplan (Planner)**
+* After all skills are assessed, the `AssessmentAgent` hands the full dossier to the **Planner**.
+* The Planner synthesizes the scores, calculates the total weeks needed to bridge the gaps, and crafts a comprehensive, week-by-week curriculum.
+* It enriches the curriculum by hitting the `resource_finder` utility to attach context-specific YouTube videos (categorized by difficulty), official documentation links, and hands-on milestones.
+
+**6. The Final Hand-off (UI → PDF)**
+* The Streamlit UI transitions to the **Results Dashboard**, rendering the data with glassmorphic cards, colored skill grids, and animated charts.
+* A final call is made to the **PDF Engine** (`utils/pdf_generator.py`) to generate an exportable, stylized document mirroring the web UI experience.
 
 ---
 

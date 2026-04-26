@@ -3,6 +3,7 @@ import time
 import os
 from dotenv import load_dotenv
 load_dotenv()
+import html
 
 from ui_styles import CSS, ORBS
 from utils.file_handler import extract_text_from_pdf, save_json_to_file
@@ -28,6 +29,11 @@ if "phase" not in st.session_state:
     st.session_state.skill_assessments = []
     st.session_state.agent = AssessmentAgent()
 
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+    st.session_state.username = ""
+    st.session_state.show_login = False
+
 # ── Components ─────────────────────────────────────────
 def render_nav(active: int):
     steps = ["Requirement", "Candidate", "Assessment", "Intelligence"]
@@ -42,7 +48,7 @@ def render_nav(active: int):
 def render_processing(text: str):
     gear_svg = '<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M41.7 13.5L46.9 3.2C48.8 3.5 50.7 4 52.4 4.5L52.8 16.1C55.6 17.2 58.2 18.7 60.5 20.6L70.1 13.9C71.3 15.3 72.5 16.8 73.5 18.4L66.3 27C67.9 29.5 69.1 32.2 69.8 35.1L81.2 36.3C81 38.3 80.6 40.2 80 42H68.3C67.3 45 65.6 47.7 63.5 50.1L70.8 59.1C69.3 60.4 67.7 61.6 66 62.6L57.9 54.7C55.2 56.4 52.3 57.7 49.2 58.5L48 70C46.1 69.8 44.1 69.3 42.4 68.8L41.9 57.1C39.1 56 36.5 54.5 34.2 52.6L24.6 59.3C23.4 57.9 22.2 56.4 21.2 54.8L28.4 46.2C26.8 43.7 25.6 41 24.9 38.1L13.5 36.9C13.7 34.9 14.1 33 14.7 31.2H26.4C27.4 28.2 29.1 25.5 31.2 23.1L23.9 14.1C25.4 12.8 27 11.6 28.7 10.6L36.8 18.5C39.5 16.8 42.4 15.5 45.5 14.7L41.7 13.5ZM47.4 48C53.6 48 58.7 42.9 58.7 36.6C58.7 30.4 53.6 25.3 47.4 25.3C41.2 25.3 36.1 30.4 36.1 36.6C36.1 42.9 41.2 48 47.4 48Z" fill="url(#g1)"/><defs><linearGradient id="g1" x1="13" y1="3" x2="81" y2="70" gradientUnits="userSpaceOnUse"><stop stop-color="#7C6AF7"/><stop offset="1" stop-color="#A78BFA"/></linearGradient></defs></svg>'
     gear_svg_s = '<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M41.7 13.5L46.9 3.2C48.8 3.5 50.7 4 52.4 4.5L52.8 16.1C55.6 17.2 58.2 18.7 60.5 20.6L70.1 13.9C71.3 15.3 72.5 16.8 73.5 18.4L66.3 27C67.9 29.5 69.1 32.2 69.8 35.1L81.2 36.3C81 38.3 80.6 40.2 80 42H68.3C67.3 45 65.6 47.7 63.5 50.1L70.8 59.1C69.3 60.4 67.7 61.6 66 62.6L57.9 54.7C55.2 56.4 52.3 57.7 49.2 58.5L48 70C46.1 69.8 44.1 69.3 42.4 68.8L41.9 57.1C39.1 56 36.5 54.5 34.2 52.6L24.6 59.3C23.4 57.9 22.2 56.4 21.2 54.8L28.4 46.2C26.8 43.7 25.6 41 24.9 38.1L13.5 36.9C13.7 34.9 14.1 33 14.7 31.2H26.4C27.4 28.2 29.1 25.5 31.2 23.1L23.9 14.1C25.4 12.8 27 11.6 28.7 10.6L36.8 18.5C39.5 16.8 42.4 15.5 45.5 14.7L41.7 13.5ZM47.4 48C53.6 48 58.7 42.9 58.7 36.6C58.7 30.4 53.6 25.3 47.4 25.3C41.2 25.3 36.1 30.4 36.1 36.6C36.1 42.9 41.2 48 47.4 48Z" fill="url(#g2)"/><defs><linearGradient id="g2" x1="13" y1="3" x2="81" y2="70" gradientUnits="userSpaceOnUse"><stop stop-color="#10B981"/><stop offset="1" stop-color="#34D399"/></linearGradient></defs></svg>'
-    st.markdown(f'<div class="neural-core-container"><div class="gear-wrapper"><div class="core-glow"></div><div class="gear gear-large">{gear_svg}</div><div class="gear gear-small">{gear_svg_s}</div></div><div class="fascinating-text">{text}</div></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="neural-core-container"><div class="gear-wrapper"><div class="core-glow"></div><div class="gear gear-large">{gear_svg}</div><div class="gear gear-small">{gear_svg_s}</div></div><div class="fascinating-text">{html.escape(text)}</div></div>', unsafe_allow_html=True)
 
 def trigger_first_question():
     """Auto-ask the first question when entering assessment for a new skill."""
@@ -70,6 +76,44 @@ def trigger_first_question():
                 agent.score_current_skill()
                 st.write("Skill context sufficient. Synchronizing next node...")
         st.rerun() 
+
+# ══════════════════════════════════════════════════════
+# LOGIN EXTRA FEATURE
+# ══════════════════════════════════════════════════════
+login_col1, login_col2 = st.columns([8, 2])
+with login_col2:
+    if not st.session_state.logged_in:
+        if st.button("Login", key="top_login_btn", use_container_width=True):
+            st.session_state.show_login = True
+            st.rerun()
+    else:
+        st.markdown(f"<div style='text-align: right; color: var(--accent); font-weight: bold;'>Welcome, {html.escape(st.session_state.username)}</div>", unsafe_allow_html=True)
+        if st.button("Logout", key="top_logout_btn", use_container_width=True):
+            st.session_state.logged_in = False
+            st.session_state.username = ""
+            st.rerun()
+
+if st.session_state.show_login and not st.session_state.logged_in:
+    st.markdown('<div style="height: 50px;"></div>', unsafe_allow_html=True)
+    with st.container(border=True):
+        st.markdown('<h2 style="color:var(--accent);">Login</h2>', unsafe_allow_html=True)
+        user_input = st.text_input("Username")
+        pwd_input = st.text_input("Password", type="password")
+        c1, c2 = st.columns(2)
+        with c1:
+            if st.button("Submit Login", use_container_width=True):
+                if user_input and pwd_input == "securepassword":
+                    st.session_state.logged_in = True
+                    st.session_state.username = user_input
+                    st.session_state.show_login = False
+                    st.rerun()
+                elif user_input:
+                    st.error("Invalid credentials.")
+        with c2:
+            if st.button("Cancel", use_container_width=True):
+                st.session_state.show_login = False
+                st.rerun()
+    st.stop()
 
 # ══════════════════════════════════════════════════════
 # PHASE: HERO
@@ -172,37 +216,43 @@ elif st.session_state.phase == "assessing":
 
     current_skill = skills[idx]
     skill_name = current_skill["skill_name"]
-
-    # Filter messages for current skill ONLY
-    current_messages = [m for m in st.session_state.messages if m.get("skill") == skill_name]
+    skill_context = current_skill.get("context", "Required for the role.")
+    target_role = agent.jd_metadata.get("target_role", "Target Role")
+    company_context = agent.jd_metadata.get("company_context", "")
 
     # ── Header: Cinematic Skill Info ──
     st.markdown(f'''
-        <div style="display:flex; flex-direction:column; align-items:center; margin-bottom:2rem; animation: fadeIn 0.8s ease-out;">
-            <div class="section-label">ACTIVE NEURAL LINK</div>
-            <h1 style="margin:0; font-size:48px; font-weight:800; background:linear-gradient(to right, #FFF, var(--accent), var(--emerald)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-align:center;">
-                {skill_name}
+        <div style="display:flex; flex-direction:column; align-items:center; margin-bottom:1.5rem; animation: fadeIn 0.8s ease-out;">
+            <div class="section-label">ACTIVE NEURAL LINK • {html.escape(target_role)}</div>
+            <h1 style="margin:0; font-size:42px; font-weight:800; background:linear-gradient(to right, #FFF, var(--accent), var(--emerald)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-align:center;">
+                {html.escape(skill_name)}
             </h1>
-            <div style="margin-top:0.8rem; display:flex; gap:10px; align-items:center;">
-                <div style="height:4px; width:100px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden;">
-                    <div style="height:100%; width:{(idx+1)/len(skills)*100}%; background:var(--accent);"></div>
+            <div style="margin-top:0.4rem; font-size:12px; color:var(--text-muted); font-style:italic; text-align:center; max-width:80%;">
+                "{html.escape(skill_context)}"
+            </div>
+            <div style="margin-top:1rem; display:flex; gap:10px; align-items:center;">
+                <div style="height:4px; width:120px; background:rgba(255,255,255,0.05); border-radius:2px; overflow:hidden;">
+                    <div style="height:100%; width:{(idx+1)/len(skills)*100}%; background:linear-gradient(90deg, var(--accent), var(--emerald));"></div>
                 </div>
                 <span style="font-family:JetBrains Mono; color:var(--text-muted); font-size:11px; letter-spacing:0.1em;">
-                    NODE {idx+1} OF {len(skills)}
+                    NODE {idx+1}/{len(skills)}
                 </span>
             </div>
         </div>
     ''', unsafe_allow_html=True)
+
+    # Filter messages for current skill ONLY
+    current_messages = [m for m in st.session_state.messages if m.get("skill") == skill_name]
 
     # ── Chat Area ──
     chat_container = st.container(height=450)
     should_rerun = False
     with chat_container:
         if not current_messages:
-            st.markdown(f'<div style="text-align:center; color:var(--text-muted); padding:3rem; font-style:italic;">Initializing intelligence probe for {skill_name}...</div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="text-align:center; color:var(--text-muted); padding:3rem; font-style:italic;">Initializing intelligence probe for {html.escape(skill_name)}...</div>', unsafe_allow_html=True)
             # AUTO-ASK (Synchronous for the first time)
             try:
-                with st.spinner("Establishing Connection..."):
+                with st.status(f"◈ SYNCHRONIZING: {skill_name}...", expanded=False):
                     try:
                         decision = agent.get_next_question()
                     except Exception as e:
@@ -288,7 +338,7 @@ elif st.session_state.phase == "generating_results":
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px;">
                 <div class="processing-icon" style="font-size: 48px; margin-bottom: 20px;">◈</div>
                 <div style="font-family: 'JetBrains Mono'; color: var(--accent); letter-spacing: 0.1em; font-size: 14px; text-transform: uppercase;">Phase {i+1}/6</div>
-                <div style="font-size: 20px; font-weight: 700; margin-top: 10px;">{status}</div>
+                <div style="font-size: 20px; font-weight: 700; margin-top: 10px;">{html.escape(status)}</div>
             </div>
             """, unsafe_allow_html=True)
             time.sleep(1.5)

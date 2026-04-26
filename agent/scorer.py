@@ -67,5 +67,6 @@ def score_skill(
             assessed_level=1,
             gap_score=required_level - 1,
             category="GAP",
-            assessment_reasoning="Failed to score assessment properly due to unexpected LLM response."
+            assessment_reasoning="Failed to score assessment properly due to unexpected LLM response.",
+            candidate_feedback="We were unable to generate specific feedback for this skill at this time."
         )

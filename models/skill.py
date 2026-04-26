@@ -10,3 +10,4 @@ class SkillAssessment(BaseModel):
     priority_score: float = 0.0
     category: Literal["STRONG", "DEVELOPING", "GAP"]
     assessment_reasoning: str
+    candidate_feedback: str = ""

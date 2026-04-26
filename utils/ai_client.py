@@ -17,6 +17,7 @@ class AIClient:
     
     # Static variable to remember rotation position across all instances
     _global_rotation_idx = 0
+    _key_cool_downs = {} # Maps key -> timestamp when it becomes available again
     
     def __init__(self, provider: str = None):
         self.primary_provider = provider or settings.AI_PROVIDER
@@ -160,17 +161,28 @@ class AIClient:
         if not self.all_keys: raise RuntimeError("No API keys configured.")
             
         error_history = []
+        num_keys = len(self.all_keys)
+        
         for attempt in range(max_retries):
-            # Calculate index based on global counter
-            num_keys = len(self.all_keys)
-            current_idx = AIClient._global_rotation_idx % num_keys
-            provider, key = self.all_keys[current_idx]
-            
-            # If we've already cycled through all keys once in this request, 
-            # take a longer breath before trying again.
-            if attempt >= num_keys and attempt % num_keys == 0:
-                logger.warning(f"All {num_keys} keys failed once. Cooling down for 5s before pass {attempt//num_keys + 1}...")
+            # Scan for a key that isn't on cooldown
+            available_key_found = False
+            for _ in range(num_keys):
+                current_idx = AIClient._global_rotation_idx % num_keys
+                provider, key = self.all_keys[current_idx]
+                
+                if time.time() >= AIClient._key_cool_downs.get(key, 0):
+                    available_key_found = True
+                    break
+                
+                # If on cooldown, move to next
+                AIClient._global_rotation_idx += 1
+                
+            if not available_key_found:
+                logger.warning(f"All {num_keys} keys are currently rate-limited/exhausted. Waiting 5s before next attempt...")
                 time.sleep(5)
+                # Pick the next one anyway to retry
+                current_idx = AIClient._global_rotation_idx % num_keys
+                provider, key = self.all_keys[current_idx]
 
             try:
                 logger.info(f"Attempt {attempt+1}: {provider} (Pool Index {current_idx+1}/{num_keys})")
@@ -199,7 +211,6 @@ class AIClient:
                 
             except Exception as e:
                 err_str = str(e).lower()
-                # Log a bit more of the error to help debug
                 full_err = f"{provider} Failed: {str(e)[:200]}"
                 logger.error(full_err)
                 error_history.append(full_err)
@@ -207,10 +218,10 @@ class AIClient:
                 # Update global index to move to next key on ANY failure
                 AIClient._global_rotation_idx += 1
                 
-                # Respect rate limits with a longer backoff
-                if "429" in err_str or "rate limit" in err_str or "quota" in err_str:
-                    logger.warning(f"Rate limit hit on {provider}. Waiting 3s...")
-                    time.sleep(3)
+                # Respect rate limits with a longer backoff and mark for cooldown
+                if "429" in err_str or "rate limit" in err_str or "quota" in err_str or "exhausted" in err_str:
+                    logger.warning(f"Rate limit/quota hit on {provider}. Marking key for 60s cooldown.")
+                    AIClient._key_cool_downs[key] = time.time() + 60
                 else:
                     # Small wait for other errors (network etc)
                     time.sleep(1)

@@ -7,6 +7,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 import pandas as pd
 from datetime import datetime
+import html
 
 from models.learning_plan import LearningPlan
 from models.skill import SkillAssessment
@@ -220,8 +221,8 @@ def _block1_header(plan: LearningPlan, assessments: list[SkillAssessment]):
     try:
         gaps = sum(1 for sp in plan.skills if sp.category == "GAP")
         n_skills = len(plan.skills)
-        name = getattr(plan, 'candidate_name', 'Candidate')
-        role = getattr(plan, 'target_role', 'Target Role')
+        name = html.escape(getattr(plan, 'candidate_name', 'Candidate'))
+        role = html.escape(getattr(plan, 'target_role', 'Target Role'))
         weeks = getattr(plan, 'total_weeks', 0)
         score = getattr(plan, 'readiness_score', 0)
 
@@ -288,7 +289,10 @@ def _block4_leverage_cards(plan: LearningPlan):
         cols = st.columns(2)
         for i, lev in enumerate(leverages):
             with cols[i % 2]:
-                st.markdown(f'<div style="background:rgba(255,255,255,0.02); border:1px solid {C_BORDER}; border-left:4px solid {C_STRONG}; border-radius:16px; padding:2rem; margin-bottom:1.5rem;"><div style="font-weight:800; font-size:14px; color:{C_TEXT};">{lev.existing_skill} → {lev.unlocks_skill}</div><div style="font-size:12px; color:{C_MUTED};">{lev.message}</div></div>', unsafe_allow_html=True)
+                es = html.escape(lev.existing_skill)
+                us = html.escape(lev.unlocks_skill)
+                msg = html.escape(lev.message)
+                st.markdown(f'<div style="background:rgba(255,255,255,0.02); border:1px solid {C_BORDER}; border-left:4px solid {C_STRONG}; border-radius:16px; padding:2rem; margin-bottom:1.5rem;"><div style="font-weight:800; font-size:14px; color:{C_TEXT};">{es} → {us}</div><div style="font-size:12px; color:{C_MUTED};">{msg}</div></div>', unsafe_allow_html=True)
     except Exception as e: st.error(f"Leverage Error: {e}")
 
 def _block5_timeline(plan: LearningPlan):
@@ -318,10 +322,26 @@ def _block5_timeline(plan: LearningPlan):
         for i, (tab, sp) in enumerate(zip(tabs, plan.skills)):
             with tab:
                 adj_skills = getattr(sp, 'adjacent_skills', [])
-                adj_html = " ".join([f"<span style='background:rgba(255,255,255,0.05); border:1px solid {C_BORDER}; border-radius:6px; padding:4px 8px; font-size:10px; color:{C_MUTED};'>#{s}</span>" for s in adj_skills])
+                adj_html = " ".join([f"<span style='background:rgba(255,255,255,0.05); border:1px solid {C_BORDER}; border-radius:6px; padding:4px 8px; font-size:10px; color:{C_MUTED};'>#{html.escape(s)}</span>" for s in adj_skills])
                 
-                st.markdown(f'<div class="skill-header"><div><div style="font-size:10px; font-weight:800; color:{C_MUTED}; text-transform:uppercase; letter-spacing:0.2em;">COGNITIVE NODE</div><div style="font-size:32px; font-weight:800; color:{C_TEXT};">{sp.skill_name}</div><div style="display:flex; gap:8px; margin-top:12px;">{adj_html}</div></div><div style="text-align:right;"><div class="badge badge-{sp.category.lower()}">{sp.category}</div><div style="font-size:24px; font-weight:800; color:{C_TEXT}; margin-top:10px;">{sp.total_weeks} <span style="font-size:12px; color:{C_MUTED};">WEEKS</span></div></div></div>', unsafe_allow_html=True)
+                sp_name = html.escape(sp.skill_name)
+                st.markdown(f'<div class="skill-header"><div><div style="font-size:10px; font-weight:800; color:{C_MUTED}; text-transform:uppercase; letter-spacing:0.2em;">COGNITIVE NODE</div><div style="font-size:32px; font-weight:800; color:{C_TEXT};">{sp_name}</div><div style="display:flex; gap:8px; margin-top:12px;">{adj_html}</div></div><div style="text-align:right;"><div class="badge badge-{sp.category.lower()}">{sp.category}</div><div style="font-size:24px; font-weight:800; color:{C_TEXT}; margin-top:10px;">{sp.total_weeks} <span style="font-size:12px; color:{C_MUTED};">WEEKS</span></div></div></div>', unsafe_allow_html=True)
                 
+                # --- NEW FEEDBACK SECTION ---
+                feedback = getattr(sp, 'candidate_feedback', "")
+                if feedback:
+                    st.markdown(f'''
+                        <div style="background: rgba(124, 106, 247, 0.03); border: 1px dashed {C_ACCENT}; border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem;">
+                            <div style="font-size: 11px; font-weight: 900; color: {C_ACCENT}; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 16px;">◈</span> PERSONALIZED FEEDBACK
+                            </div>
+                            <div style="font-size: 15px; line-height: 1.6; color: {C_TEXT}; font-style: italic;">
+                                "{html.escape(feedback)}"
+                            </div>
+                        </div>
+                    ''', unsafe_allow_html=True)
+                # ----------------------------
+
                 if sp.category == "STRONG":
                     st.success("Mastery verified. Stay sharp with advanced internals."); continue
                 
@@ -337,15 +357,19 @@ def _block5_timeline(plan: LearningPlan):
     except Exception as e: st.error(f"Timeline Error: {e}")
 
 def _render_week_content(topic, skill_id):
-    st.markdown(f'<div style="background:rgba(124, 106, 247, 0.05); border-left:4px solid {C_ACCENT}; padding:1.5rem; border-radius:0 16px 16px 0; margin-bottom:2rem;"><div style="font-size:10px; font-weight:800; color:{C_ACCENT}; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:4px;">OBJECTIVE: {topic.title}</div><div style="font-size:16px; color:{C_TEXT}; font-weight:600;">{topic.objective}</div></div>', unsafe_allow_html=True)
+    t_title = html.escape(topic.title)
+    t_obj = html.escape(topic.objective)
+    st.markdown(f'<div style="background:rgba(124, 106, 247, 0.05); border-left:4px solid {C_ACCENT}; padding:1.5rem; border-radius:0 16px 16px 0; margin-bottom:2rem;"><div style="font-size:10px; font-weight:800; color:{C_ACCENT}; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:4px;">OBJECTIVE: {t_title}</div><div style="font-size:16px; color:{C_TEXT}; font-weight:600;">{t_obj}</div></div>', unsafe_allow_html=True)
     with st.expander("📖 WHAT TO STUDY THIS WEEK", expanded=True):
-        for i, item in enumerate(topic.what_to_study): st.markdown(f"{i+1}. {item}")
+        for i, item in enumerate(topic.what_to_study): st.markdown(f"{i+1}. {html.escape(item)}")
 
     col1, col2 = st.columns(2)
     with col1:
-        st.markdown(f'<div class="res-box"><div class="res-box-title">Official Documentation</div>{"".join([f"<div style=\'margin-bottom:20px;\'><a href=\'{d.url}\' target=\'_blank\' style=\'color:{C_TEXT}; font-weight:800; text-decoration:none; font-size:18px; border-bottom: 1px solid rgba(255,255,255,0.1);\'>{d.title}</a><div style=\'font-size:15px; color:{C_MUTED}; margin-top:6px; line-height:1.5;\'>{d.description}</div></div>" for d in topic.documentation])}</div>', unsafe_allow_html=True)
+        docs_html = "".join([f"<div style='margin-bottom:20px;'><a href='{html.escape(d.url)}' target='_blank' style='color:{C_TEXT}; font-weight:800; text-decoration:none; font-size:18px; border-bottom: 1px solid rgba(255,255,255,0.1);'>{html.escape(d.title)}</a><div style='font-size:15px; color:{C_MUTED}; margin-top:6px; line-height:1.5;'>{html.escape(d.description)}</div></div>" for d in topic.documentation])
+        st.markdown(f'<div class="res-box"><div class="res-box-title">Official Documentation</div>{docs_html}</div>', unsafe_allow_html=True)
         st.markdown('<div style="height:1.5rem;"></div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="res-box"><div class="res-box-title">Deep Dive Assets</div>{"".join([f"<div style=\'margin-bottom:15px; padding: 12px; background: rgba(124, 106, 247, 0.05); border-radius: 10px;\'><span class=\'badge\' style=\'background:rgba(124, 106, 247, 0.2); border:1px solid {C_ACCENT}; font-size:11px; padding:4px 10px; margin-right:10px;\'>{r.type.upper()}</span> <a href=\'{r.url}\' target=\'_blank\' style=\'color:{C_TEXT}; font-weight:800; text-decoration:none; font-size:16px;\'>{r.title}</a></div>" for r in topic.extra_resources])}</div>', unsafe_allow_html=True)
+        assets_html = "".join([f"<div style='margin-bottom:15px; padding: 12px; background: rgba(124, 106, 247, 0.05); border-radius: 10px;'><span class='badge' style='background:rgba(124, 106, 247, 0.2); border:1px solid {C_ACCENT}; font-size:11px; padding:4px 10px; margin-right:10px;'>{html.escape(r.type).upper()}</span> <a href='{html.escape(r.url)}' target='_blank' style='color:{C_TEXT}; font-weight:800; text-decoration:none; font-size:16px;'>{html.escape(r.title)}</a></div>" for r in topic.extra_resources])
+        st.markdown(f'<div class="res-box"><div class="res-box-title">Deep Dive Assets</div>{assets_html}</div>', unsafe_allow_html=True)
     with col2:
         yt = topic.youtube
         st.markdown(f"""
@@ -353,23 +377,25 @@ def _render_week_content(topic, skill_id):
             <div class="res-box-title" style="color: {C_GAP} !important;">🔥 Visual Intelligence (3 Levels)</div>
             <div class="yt-level-card">
                 <div class="yt-level-tag" style="color:{C_STRONG}">⚡ LEVEL 1: EASY</div>
-                <a href="{yt.easy.url}" target="_blank" class="yt-title">{yt.easy.title}</a>
-                <div class="yt-meta">📺 {yt.easy.channel} • <span style="color:{C_STRONG}; font-weight:900;">{yt.easy.why}</span></div>
+                <a href="{html.escape(yt.easy.url)}" target="_blank" class="yt-title">{html.escape(yt.easy.title)}</a>
+                <div class="yt-meta">📺 {html.escape(yt.easy.channel)} • <span style="color:{C_STRONG}; font-weight:900;">{html.escape(yt.easy.why)}</span></div>
             </div>
             <div class="yt-level-card">
                 <div class="yt-level-tag" style="color:{C_DEVELOPING}">🚀 LEVEL 2: MEDIUM</div>
-                <a href="{yt.medium.url}" target="_blank" class="yt-title">{yt.medium.title}</a>
-                <div class="yt-meta">📺 {yt.medium.channel} • <span style="color:{C_DEVELOPING}; font-weight:900;">{yt.medium.why}</span></div>
+                <a href="{html.escape(yt.medium.url)}" target="_blank" class="yt-title">{html.escape(yt.medium.title)}</a>
+                <div class="yt-meta">📺 {html.escape(yt.medium.channel)} • <span style="color:{C_DEVELOPING}; font-weight:900;">{html.escape(yt.medium.why)}</span></div>
             </div>
             <div class="yt-level-card">
                 <div class="yt-level-tag" style="color:{C_GAP}">💀 LEVEL 3: HARD</div>
-                <a href="{yt.hard.url}" target="_blank" class="yt-title">{yt.hard.title}</a>
-                <div class="yt-meta">📺 {yt.hard.channel} • <span style="color:{C_GAP}; font-weight:900;">{yt.hard.why}</span></div>
+                <a href="{html.escape(yt.hard.url)}" target="_blank" class="yt-title">{html.escape(yt.hard.title)}</a>
+                <div class="yt-meta">📺 {html.escape(yt.hard.channel)} • <span style="color:{C_GAP}; font-weight:900;">{html.escape(yt.hard.why)}</span></div>
             </div>
         </div>
         """, unsafe_allow_html=True)
         st.markdown('<div style="height:1.5rem;"></div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="res-box"><div class="res-box-title">Tactical Execution</div><div style="font-size:15px; font-weight:700; color:{C_TEXT}; margin-bottom:10px;">{topic.hands_on}</div><div style="background:rgba(99,153,34,0.1); border:1px solid {C_STRONG}; border-radius:10px; padding:12px;"><div style="color:{C_STRONG}; font-size:10px; font-weight:800; margin-bottom:4px;">MILESTONE</div><div style="font-size:13px; color:{C_TEXT};">{topic.milestone}</div></div></div>', unsafe_allow_html=True)
+        t_ho = html.escape(topic.hands_on)
+        t_ms = html.escape(topic.milestone)
+        st.markdown(f'<div class="res-box"><div class="res-box-title">Tactical Execution</div><div style="font-size:15px; font-weight:700; color:{C_TEXT}; margin-bottom:10px;">{t_ho}</div><div style="background:rgba(99,153,34,0.1); border:1px solid {C_STRONG}; border-radius:10px; padding:12px;"><div style="color:{C_STRONG}; font-size:10px; font-weight:800; margin-bottom:4px;">MILESTONE</div><div style="font-size:13px; color:{C_TEXT};">{t_ms}</div></div></div>', unsafe_allow_html=True)
 
 def _block7_readiness(plan: LearningPlan):
     try:
@@ -382,6 +408,6 @@ def _block7_readiness(plan: LearningPlan):
 def _block8_motivation(plan: LearningPlan):
     try:
         st.markdown('<div class="section-title">Intelligence Synthesis</div>', unsafe_allow_html=True)
-        summary = getattr(plan, 'summary', 'Processing complete.')
+        summary = html.escape(getattr(plan, 'summary', 'Processing complete.'))
         st.markdown(f'<div style="background:{C_CARD_BG}; backdrop-filter:blur(20px); border:1px solid {C_BORDER}; border-radius:20px; padding:2rem; line-height:1.8; font-size:16px; border-left:6px solid {C_ACCENT};">{summary}</div>', unsafe_allow_html=True)
     except Exception as e: st.error(f"Motivation Error: {e}")

@@ -21,6 +21,7 @@ class AssessmentAgent:
     def __init__(self):
         self.candidate_profile = None
         self.required_skills = []
+        self.jd_metadata = {}
         self.current_skill_index = 0
         self.conversation_history = {} # skill_name -> list of dicts
         self.skill_assessments = []
@@ -32,7 +33,13 @@ class AssessmentAgent:
         self.candidate_profile = parse_resume(resume_text)
         
         logger.info("Parsing job description...")
-        self.required_skills = parse_jd(jd_text)
+        jd_data = parse_jd(jd_text)
+        self.required_skills = jd_data.get("skills", [])
+        self.jd_metadata = {
+            "target_role": jd_data.get("target_role", "Target Role"),
+            "years_experience_required": jd_data.get("years_experience_required", 0),
+            "company_context": jd_data.get("company_context", "")
+        }
         
         # Initialize conversation history for each required skill
         for skill in self.required_skills:
@@ -95,9 +102,12 @@ class AssessmentAgent:
         is_required = current_skill.get("is_required", True)
         history = self.conversation_history[skill_name]
         
-        # Estimate claimed level
-        claimed_skills = [s.lower() for s in self.candidate_profile.skills_from_resume]
-        claimed_level = 5 if skill_name.lower() in claimed_skills else 1
+        # Estimate claimed level from CandidateProfile.skills_from_resume
+        claimed_level = 1
+        for s in self.candidate_profile.skills_from_resume:
+            if s["name"].lower() == skill_name.lower():
+                claimed_level = s["estimated_level"]
+                break
         
         assessment = score_skill(
             skill_name=skill_name,
@@ -114,8 +124,7 @@ class AssessmentAgent:
     def generate_plan(self) -> LearningPlan:
         """Phase 4: Generate the personalized learning plan."""
         logger.info("Generating learning plan from assessments...")
-        # Simplistic target role derivation (first sentence of JD or generic)
-        target_role = "Target Role based on JD"
+        target_role = self.jd_metadata.get("target_role", "Target Role")
         
         self.learning_plan = generate_learning_plan(
             candidate_profile=self.candidate_profile,
