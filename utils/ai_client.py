@@ -30,14 +30,17 @@ class AIClient:
         self.gemini_model_name = settings.GEMINI_MODEL
         self.groq_model_name = settings.GROQ_MODEL
         
-        # Build the final sorted pool once
-        # Priority: Groq first, then Gemini
+        # Build the final sorted pool based on primary provider
         gemini_items = [("gemini", k) for k in self.gemini_keys]
         groq_items = [("groq", k) for k in self.groq_keys]
-        self.all_keys = groq_items + gemini_items
+        
+        if self.primary_provider == "gemini":
+            self.all_keys = gemini_items + groq_items
+        else:
+            self.all_keys = groq_items + gemini_items
         
         if not self.all_keys:
-            logger.error("No API keys discovered in .env!")
+            logger.error("No API keys discovered!")
 
     def _discover_keys(self, prefix: str) -> list[str]:
         import os
