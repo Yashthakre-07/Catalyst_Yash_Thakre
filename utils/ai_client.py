@@ -78,30 +78,6 @@ class AIClient:
         system_prompt: str,
         user_message: str,
         temperature: float = 0.3,
-        max_tokens: int = 2000,
-        provider_override: str = None,
-        api_key_override: str = None
-    ) -> str:
-        provider = provider_override or self.current_provider
-        
-        if provider == "gemini":
-            if api_key_override:
-                key = api_key_override
-            elif self.gemini_keys:
-                key = self.gemini_keys[0]
-            else:
-                raise ValueError("No Gemini API keys available.")
-                
-            genai.configure(api_key=key)
-            
-            safety_settings = [
-                {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
-                {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
-    def complete(
-        self,
-        system_prompt: str,
-        user_message: str,
-        temperature: float = 0.3,
         max_tokens: int = 4000,
         provider_override: Optional[str] = None,
         api_key_override: Optional[str] = None,
