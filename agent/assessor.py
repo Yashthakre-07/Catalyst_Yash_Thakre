@@ -70,6 +70,7 @@ def get_next_question(
     response_text = client.complete_with_retry(
         system_prompt="You are an expert technical interviewer.",
         user_message=prompt,
+        max_tokens=500,
         skill_context=skill_name
     )
     

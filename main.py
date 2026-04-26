@@ -144,11 +144,11 @@ elif st.session_state.phase == "step_resume":
 # PROCESSING ANIMATIONS
 # ══════════════════════════════════════════════════════
 elif st.session_state.phase == "processing_jd":
-    render_nav(0); render_processing("Contextualizing Requirement..."); time.sleep(3)
+    render_nav(0); render_processing("Contextualizing Requirement..."); time.sleep(0.5)
     st.session_state.phase = "step_resume"; st.rerun()
 
 elif st.session_state.phase == "processing_resume":
-    render_nav(1); render_processing("Decoding Neural Alignment..."); time.sleep(3)
+    render_nav(1); render_processing("Decoding Neural Alignment..."); time.sleep(0.5)
     st.session_state.agent.parse_documents(st.session_state.resume_text, st.session_state.jd_text)
     st.session_state.messages = []  # Clear messages for fresh assessment
     st.session_state.phase = "assessing"; st.rerun()
@@ -300,9 +300,9 @@ elif st.session_state.phase == "generating_results":
                 <div style="font-size: 20px; font-weight: 700; margin-top: 10px;">{html.escape(status)}</div>
             </div>
             """, unsafe_allow_html=True)
-            time.sleep(1.5)
             if i == 0: # Do actual work in the first step or throughout
                 st.session_state.learning_plan = st.session_state.agent.generate_plan()
+            time.sleep(0.3)
     
     st.session_state.phase = "results"
     st.rerun()
