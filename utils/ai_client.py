@@ -155,7 +155,7 @@ class AIClient:
         self,
         system_prompt: str,
         user_message: str,
-        max_retries: int = 10,
+        max_retries: int = 15,
         temperature: float = 0.3,
         max_tokens: int = 4000,
         is_json: bool = True,
@@ -168,33 +168,21 @@ class AIClient:
         
         for attempt in range(max_retries):
             # Scan for a key that isn't on cooldown
-            available_key_found = False
-            for _ in range(num_keys):
-                current_idx = AIClient._global_rotation_idx % num_keys
-                provider, key = self.all_keys[current_idx]
-                
-                if time.time() >= AIClient._key_cool_downs.get(key, 0):
-                    available_key_found = True
-                    break
-                
-                # If on cooldown, move to next
+            current_idx = AIClient._global_rotation_idx % num_keys
+            provider, key = self.all_keys[current_idx]
+            
+            # If this key is on cooldown, skip it immediately
+            if time.time() < AIClient._key_cool_downs.get(key, 0):
                 AIClient._global_rotation_idx += 1
-                
-            if not available_key_found:
-                logger.warning(f"All {num_keys} keys are currently rate-limited/exhausted. Waiting 5s before next attempt...")
-                time.sleep(5)
-                # Pick the next one anyway to retry
-                current_idx = AIClient._global_rotation_idx % num_keys
-                provider, key = self.all_keys[current_idx]
+                continue
 
             try:
-                logger.info(f"Attempt {attempt+1}: {provider} (Pool Index {current_idx+1}/{num_keys})")
+                logger.info(f"Attempt {attempt+1}: {provider} (Key {current_idx+1}/{num_keys})")
                 raw = self.complete(system_prompt, user_message, temperature, 
                                    max_tokens=max_tokens,
                                    provider_override=provider, api_key_override=key)
                 
                 if not raw:
-                    logger.warning(f"Empty response from {provider}. Rotating...")
                     AIClient._global_rotation_idx += 1
                     continue
 
@@ -203,10 +191,7 @@ class AIClient:
                     try:
                         json.loads(stripped)
                         return stripped
-                    except json.JSONDecodeError as je:
-                        err_msg = f"JSON Parse Failure ({provider}). First 50 chars: {raw[:50]!r}"
-                        logger.warning(err_msg)
-                        error_history.append(err_msg)
+                    except json.JSONDecodeError:
                         AIClient._global_rotation_idx += 1
                         continue
                 
@@ -214,23 +199,14 @@ class AIClient:
                 
             except Exception as e:
                 err_str = str(e).lower()
-                full_err = f"{provider} Failed: {str(e)[:200]}"
-                logger.error(full_err)
-                error_history.append(full_err)
+                logger.warning(f"Key {current_idx+1} failed: {err_str[:100]}")
                 
-                # Update global index to move to next key on ANY failure
+                # Mark for cooldown if it's a rate limit/quota error
+                if any(x in err_str for x in ["429", "rate", "quota", "exhausted", "limit"]):
+                    AIClient._key_cool_downs[key] = time.time() + 90 # 90s cooldown
+                
                 AIClient._global_rotation_idx += 1
-                
-                # Respect rate limits with a longer backoff and mark for cooldown
-                if "429" in err_str or "rate limit" in err_str or "quota" in err_str or "exhausted" in err_str:
-                    logger.warning(f"Rate limit/quota hit on {provider}. Marking key for 60s cooldown.")
-                    AIClient._key_cool_downs[key] = time.time() + 60
-                else:
-                    # Small wait for other errors (network etc)
-                    time.sleep(1)
+                # No sleep here - just try the next key immediately!
                 continue
                 
-        # If we get here, all attempts failed
-        unique_errors = list(set(error_history))[-3:] # Last 3 unique errors
-        err_summary = " | ".join(unique_errors)
-        raise RuntimeError(f"CRITICAL: All {len(self.all_keys)} API keys exhausted after {max_retries} attempts. Recent Errors: {err_summary}")
+        raise RuntimeError(f"CRITICAL: All {num_keys} keys exhausted after {max_retries} attempts. Check your API quotas.")
