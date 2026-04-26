@@ -52,11 +52,14 @@ def get_next_question(
 
     client = AIClient()
     
+    # Extract names from the list of skill dictionaries
+    skill_names = [s.get("name", str(s)) for s in candidate_profile.skills_from_resume]
+    
     background = (
         f"Name: {candidate_profile.name}\n"
         f"Current Role: {candidate_profile.current_role}\n"
         f"Years Experience: {candidate_profile.years_experience}\n"
-        f"Skills on Resume: {', '.join(candidate_profile.skills_from_resume)}"
+        f"Skills on Resume: {', '.join(skill_names)}"
     )
     
     transcript = format_conversation(conversation_so_far)
