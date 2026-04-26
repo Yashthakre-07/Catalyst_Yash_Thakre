@@ -26,18 +26,23 @@ class AIClient:
         # Key Pools
         self.gemini_keys = self._discover_keys("GEMINI_API_KEY")
         self.groq_keys = self._discover_keys("GROQ_API_KEY")
+        self.nvidia_keys = self._discover_keys("NVIDIA_API_KEY")
         
         self.gemini_model_name = settings.GEMINI_MODEL
         self.groq_model_name = settings.GROQ_MODEL
+        self.nvidia_model_name = settings.NVIDIA_MODEL
         
         # Build the final sorted pool based on primary provider
         gemini_items = [("gemini", k) for k in self.gemini_keys]
         groq_items = [("groq", k) for k in self.groq_keys]
+        nvidia_items = [("nvidia", k) for k in self.nvidia_keys]
         
         if self.primary_provider == "gemini":
-            self.all_keys = gemini_items + groq_items
+            self.all_keys = gemini_items + groq_items + nvidia_items
+        elif self.primary_provider == "nvidia":
+            self.all_keys = nvidia_items + gemini_items + groq_items
         else:
-            self.all_keys = groq_items + gemini_items
+            self.all_keys = groq_items + gemini_items + nvidia_items
         
         if not self.all_keys:
             logger.error("No API keys discovered!")
@@ -92,66 +97,73 @@ class AIClient:
             safety_settings = [
                 {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
                 {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
-                {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
-                {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
-            ]
-            
-            model = genai.GenerativeModel(
-                model_name=self.gemini_model_name,
-                system_instruction=system_prompt,
-                safety_settings=safety_settings
-            )
-            
-            try:
-                response = model.generate_content(
-                    user_message,
-                    generation_config=genai.types.GenerationConfig(
-                        temperature=temperature,
-                        max_output_tokens=max_tokens,
-                    )
+    def complete(
+        self,
+        system_prompt: str,
+        user_message: str,
+        temperature: float = 0.3,
+        max_tokens: int = 4000,
+        provider_override: Optional[str] = None,
+        api_key_override: Optional[str] = None,
+        json_mode: bool = False
+    ) -> Optional[str]:
+        provider = provider_override or self.primary_provider
+        
+        try:
+            if provider == "gemini":
+                if api_key_override:
+                    genai.configure(api_key=api_key_override)
+                elif self.gemini_keys:
+                    genai.configure(api_key=self.gemini_keys[0])
+                else:
+                    raise ValueError("No Gemini keys")
+                    
+                model = genai.GenerativeModel(
+                    model_name=self.gemini_model_name,
+                    system_instruction=system_prompt,
+                    safety_settings=[
+                        {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+                        {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+                        {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
+                        {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
+                    ]
                 )
-                if not response:
-                    raise ValueError("Gemini returned an empty response object.")
-                try:
-                    return response.text
-                except ValueError:
-                    # Handle safety blocks or empty candidates
-                    if hasattr(response, 'candidates') and response.candidates:
-                        reason = response.candidates[0].finish_reason
-                        # If it was blocked, we might want to know why
-                        block_msg = f"Gemini block/stop. Reason: {reason}"
-                        if hasattr(response.candidates[0], 'safety_ratings'):
-                            ratings = response.candidates[0].safety_ratings
-                            block_msg += f" Safety: {ratings}"
-                        raise ValueError(block_msg)
-                    raise ValueError("Gemini response.text failed (likely safety block or empty response).")
-            except Exception as e:
-                raise e
-
-        elif provider == "groq":
-            if api_key_override:
-                key = api_key_override
-            elif self.groq_keys:
-                key = self.groq_keys[0]
-            else:
-                raise ValueError("No Groq API keys available.")
+                response = model.generate_content(user_message, generation_config={"temperature": temperature, "max_output_tokens": max_tokens})
+                return response.text
                 
-            client = Groq(api_key=key)
-            try:
+            elif provider == "groq":
+                key = api_key_override or (self.groq_keys[0] if self.groq_keys else None)
+                if not key: raise ValueError("No Groq keys")
+                client = Groq(api_key=key)
                 response = client.chat.completions.create(
                     model=self.groq_model_name,
-                    messages=[
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_message}
-                    ],
-                    temperature=temperature,
-                    max_tokens=max_tokens,
+                    messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_message}],
+                    temperature=temperature, max_tokens=max_tokens
                 )
                 return response.choices[0].message.content
-            except Exception as e:
-                raise e
-        
-        raise ValueError(f"Unknown provider: {provider}")
+
+            elif provider == "nvidia":
+                key = api_key_override or (self.nvidia_keys[0] if self.nvidia_keys else None)
+                if not key: raise ValueError("No NVIDIA keys")
+                return self._complete_nvidia(key, system_prompt, user_message, temperature, max_tokens)
+                
+        except Exception as e:
+            logger.error(f"AIClient Error ({provider}): {e}")
+            raise e
+            
+        return None
+
+    def _complete_nvidia(self, api_key, system_prompt, user_prompt, temperature, max_tokens):
+        url = "https://integrate.api.nvidia.com/v1/chat/completions"
+        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+        payload = {
+            "model": self.nvidia_model_name,
+            "messages": [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}],
+            "temperature": temperature, "max_tokens": max_tokens, "stream": False
+        }
+        response = requests.post(url, headers=headers, json=payload, timeout=30)
+        if response.status_code != 200: raise Exception(f"NVIDIA Error: {response.text}")
+        return response.json()["choices"][0]["message"]["content"]
 
     def _extract_json(self, text: str) -> str:
         first_brace = text.find('{')
@@ -178,25 +190,19 @@ class AIClient:
         **kwargs
     ) -> str:
         if not self.all_keys: raise RuntimeError("No API keys configured.")
-            
-        error_history = []
         num_keys = len(self.all_keys)
         
         for attempt in range(max_retries):
-            # Scan for a key that isn't on cooldown
             current_idx = AIClient._global_rotation_idx % num_keys
             provider, key = self.all_keys[current_idx]
             
-            # If this key is on cooldown, skip it immediately
             if time.time() < AIClient._key_cool_downs.get(key, 0):
                 AIClient._global_rotation_idx += 1
                 continue
 
             try:
                 logger.info(f"Attempt {attempt+1}: {provider} (Key {current_idx+1}/{num_keys})")
-                raw = self.complete(system_prompt, user_message, temperature, 
-                                   max_tokens=max_tokens,
-                                   provider_override=provider, api_key_override=key)
+                raw = self.complete(system_prompt, user_message, temperature, max_tokens, provider_override=provider, api_key_override=key)
                 
                 if not raw:
                     AIClient._global_rotation_idx += 1
@@ -210,19 +216,14 @@ class AIClient:
                     except json.JSONDecodeError:
                         AIClient._global_rotation_idx += 1
                         continue
-                
                 return raw.strip()
                 
             except Exception as e:
                 err_str = str(e).lower()
                 logger.warning(f"Key {current_idx+1} failed: {err_str[:100]}")
-                
-                # Mark for cooldown if it's a rate limit/quota error
                 if any(x in err_str for x in ["429", "rate", "quota", "exhausted", "limit"]):
-                    AIClient._key_cool_downs[key] = time.time() + 90 # 90s cooldown
-                
+                    AIClient._key_cool_downs[key] = time.time() + 90
                 AIClient._global_rotation_idx += 1
-                # No sleep here - just try the next key immediately!
                 continue
                 
-        raise RuntimeError(f"CRITICAL: All {num_keys} keys exhausted after {max_retries} attempts. Check your API quotas.")
+        raise RuntimeError(f"CRITICAL: All {num_keys} keys exhausted. Check your API quotas.")
