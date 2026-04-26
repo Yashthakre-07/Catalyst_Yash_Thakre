@@ -63,7 +63,9 @@ class AIClient:
                 val = st_secrets[env_key]
                 
             if val:
-                keys.append(val)
+                # CLEANING: Remove any accidental quotes or spaces
+                cleaned_val = val.strip().replace('"', '').replace("'", "")
+                keys.append(cleaned_val)
         return list(dict.fromkeys(keys)) # Remove duplicates
 
     def complete(

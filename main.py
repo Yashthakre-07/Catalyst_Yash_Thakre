@@ -211,12 +211,12 @@ elif st.session_state.phase == "assessing":
             st.markdown(f'<div style="text-align:center; color:var(--text-muted); padding:3rem; font-style:italic;">Initializing intelligence probe for {html.escape(skill_name)}...</div>', unsafe_allow_html=True)
             # AUTO-ASK (Synchronous for the first time)
             try:
-                with st.status(f"◈ SYNCHRONIZING: {skill_name}...", expanded=False):
+                with st.spinner(f"◈ Establishing Intelligence Probe for {skill_name}..."):
                     try:
                         decision = agent.get_next_question()
                     except Exception as e:
                         st.error(f"◈ NEURAL LINK FAILURE: {str(e)}")
-                        st.info("The AI engine is currently unreachable. This is usually due to rate limits or invalid keys in your .env file.")
+                        st.info("Check your API keys in Streamlit Secrets. If all keys are exhausted, the app will hang.")
                         st.stop()
                     if decision.get("type") == "question":
                         st.session_state.messages.append({
