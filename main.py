@@ -29,10 +29,6 @@ if "phase" not in st.session_state:
     st.session_state.skill_assessments = []
     st.session_state.agent = AssessmentAgent()
 
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-    st.session_state.username = ""
-    st.session_state.show_login = False
 
 # ── Components ─────────────────────────────────────────
 def render_nav(active: int):
@@ -77,43 +73,6 @@ def trigger_first_question():
                 st.write("Skill context sufficient. Synchronizing next node...")
         st.rerun() 
 
-# ══════════════════════════════════════════════════════
-# LOGIN EXTRA FEATURE
-# ══════════════════════════════════════════════════════
-login_col1, login_col2 = st.columns([8, 2])
-with login_col2:
-    if not st.session_state.logged_in:
-        if st.button("Login", key="top_login_btn", use_container_width=True):
-            st.session_state.show_login = True
-            st.rerun()
-    else:
-        st.markdown(f"<div style='text-align: right; color: var(--accent); font-weight: bold;'>Welcome, {html.escape(st.session_state.username)}</div>", unsafe_allow_html=True)
-        if st.button("Logout", key="top_logout_btn", use_container_width=True):
-            st.session_state.logged_in = False
-            st.session_state.username = ""
-            st.rerun()
-
-if st.session_state.show_login and not st.session_state.logged_in:
-    st.markdown('<div style="height: 50px;"></div>', unsafe_allow_html=True)
-    with st.container(border=True):
-        st.markdown('<h2 style="color:var(--accent);">Login</h2>', unsafe_allow_html=True)
-        user_input = st.text_input("Username")
-        pwd_input = st.text_input("Password", type="password")
-        c1, c2 = st.columns(2)
-        with c1:
-            if st.button("Submit Login", use_container_width=True):
-                if user_input and pwd_input == "securepassword":
-                    st.session_state.logged_in = True
-                    st.session_state.username = user_input
-                    st.session_state.show_login = False
-                    st.rerun()
-                elif user_input:
-                    st.error("Invalid credentials.")
-        with c2:
-            if st.button("Cancel", use_container_width=True):
-                st.session_state.show_login = False
-                st.rerun()
-    st.stop()
 
 # ══════════════════════════════════════════════════════
 # PHASE: HERO
