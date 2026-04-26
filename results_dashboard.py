@@ -11,16 +11,15 @@ import html
 
 from models.learning_plan import LearningPlan
 from models.skill import SkillAssessment
-
-# ─── Color System (Neural Dark) ──────────────────────────
-C_STRONG = "#639922"      # Neural Green
-C_DEVELOPING = "#EF9F27"  # Neural Amber
-C_GAP = "#E24B4A"         # Neural Red
-C_TEXT = "#F8FAFC"
+# ─── Color System (GOD Tier Neural) ──────────────────────
+C_STRONG = "#10B981"      # Emerald Neon
+C_DEVELOPING = "#FBBF24"  # Amber Neon
+C_GAP = "#F43F5E"         # Rose Neon
+C_TEXT = "#FFFFFF"
 C_MUTED = "#94A3B8"
-C_ACCENT = "#7C6AF7"      # Neural Purple
-C_CARD_BG = "rgba(15, 23, 42, 0.7)"
-C_BORDER = "rgba(255, 255, 255, 0.1)"
+C_ACCENT = "#7C6AF7"      # Electric Purple
+C_CARD_BG = "rgba(10, 15, 30, 0.8)"
+C_BORDER = "rgba(255, 255, 255, 0.08)"
 
 def _cat_color(category: str) -> str:
     return {
@@ -29,176 +28,168 @@ def _cat_color(category: str) -> str:
         "GAP": C_GAP,
     }.get(category, C_MUTED)
 
-def _plotly_layout(fig, height=400):
+def _plotly_layout(fig, height=450):
     fig.update_layout(
         template="plotly_dark",
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Inter, sans-serif", color=C_TEXT, size=13),
-        margin=dict(l=20, r=20, t=40, b=20),
+        font=dict(family="Plus Jakarta Sans, sans-serif", color=C_TEXT, size=14),
+        margin=dict(l=30, r=30, t=50, b=30),
         height=height,
-        showlegend=True
+        showlegend=True,
+        hoverlabel=dict(bgcolor="#1E293B", font_size=14, font_family="JetBrains Mono")
     )
-    fig.update_xaxes(gridcolor="rgba(255,255,255,0.05)", zerolinecolor="rgba(255,255,255,0.1)")
-    fig.update_yaxes(gridcolor="rgba(255,255,255,0.05)", zerolinecolor="rgba(255,255,255,0.1)")
+    fig.update_xaxes(gridcolor="rgba(255,255,255,0.03)", zerolinecolor="rgba(255,255,255,0.08)")
+    fig.update_yaxes(gridcolor="rgba(255,255,255,0.03)", zerolinecolor="rgba(255,255,255,0.08)")
     return fig
 
 def render_dashboard(plan: LearningPlan, assessments: list[SkillAssessment]):
-    # Global CSS for Mastery UI
+    # Global CSS for GOD Tier Mastery UI
     st.markdown(f"""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
     
-    /* Neural Tabs */
+    html, body, [data-testid="stAppViewContainer"] {{
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+    }}
+
+    /* Neural Tabs - Premium */
     .stTabs [data-baseweb="tab-list"] {{
-        gap: 8px !important;
+        gap: 12px !important;
         background-color: transparent !important;
+        margin-bottom: 2rem !important;
     }}
     .stTabs [data-baseweb="tab"] {{
-        background-color: rgba(255, 255, 255, 0.03) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        border-radius: 12px 12px 0 0 !important;
-        padding: 10px 20px !important;
+        background-color: rgba(255, 255, 255, 0.02) !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+        border-radius: 16px !important;
+        padding: 12px 28px !important;
         color: {C_MUTED} !important;
+        font-weight: 700 !important;
+        transition: all 0.3s ease !important;
     }}
     .stTabs [aria-selected="true"] {{
-        background-color: rgba(124, 106, 247, 0.1) !important;
+        background: linear-gradient(135deg, rgba(124, 106, 247, 0.2), rgba(16, 185, 129, 0.1)) !important;
         border-color: {C_ACCENT} !important;
-        color: {C_TEXT} !important;
+        color: white !important;
+        box-shadow: 0 10px 20px -10px {C_ACCENT} !important;
+        transform: translateY(-2px);
     }}
     
-    /* Skill Header */
+    /* Skill Header - GOD LEVEL */
     .skill-header {{
-        background: linear-gradient(135deg, rgba(124, 106, 247, 0.1), rgba(15, 23, 42, 0.5)) !important;
+        background: linear-gradient(165deg, rgba(15, 23, 42, 0.9), rgba(2, 6, 23, 1)) !important;
         border: 1px solid {C_BORDER} !important;
-        border-radius: 20px !important;
-        padding: 2rem !important;
-        margin-bottom: 2rem !important;
+        border-top: 2px solid {C_ACCENT} !important;
+        border-radius: 32px !important;
+        padding: 3rem !important;
+        margin-bottom: 3rem !important;
         display: flex !important;
         justify-content: space-between !important;
         align-items: center !important;
+        box-shadow: 0 40px 80px -20px rgba(0,0,0,0.8) !important;
     }}
     
-    /* Resource Grid */
-    .res-grid {{
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 1.5rem !important;
-    }}
+    /* Resource Grid - Catchy */
     .res-box {{
-        background: rgba(255,255,255,0.02) !important;
+        background: rgba(255,255,255,0.01) !important;
+        backdrop-filter: blur(10px) !important;
         border: 1px solid {C_BORDER} !important;
-        border-radius: 16px !important;
-        padding: 1.5rem !important;
-        height: 100% !important;
+        border-radius: 24px !important;
+        padding: 2rem !important;
+        transition: border-color 0.3s ease !important;
+    }}
+    .res-box:hover {{
+        border-color: rgba(124, 106, 247, 0.3) !important;
     }}
     .res-box-title {{
-        font-size: 16px !important;
+        font-size: 14px !important;
         font-weight: 900 !important;
         color: {C_ACCENT} !important;
         text-transform: uppercase !important;
-        letter-spacing: 0.15em !important;
-        margin-bottom: 1.5rem !important;
+        letter-spacing: 0.2em !important;
+        margin-bottom: 2rem !important;
         display: flex !important;
         align-items: center !important;
         gap: 12px !important;
     }}
-    .res-box-title::before {{
-        content: "◆" !important;
-        color: {C_STRONG} !important;
-    }}
     
-    /* YouTube Levels - EYE TAKING */
+    /* YouTube Cards - STUNNING */
     .yt-level-card {{
-        background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(0,0,0,0.6)) !important;
-        border: 2px solid rgba(255,255,255,0.1) !important;
+        background: rgba(255, 255, 255, 0.02) !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
         border-radius: 20px !important;
-        padding: 1.8rem !important;
-        margin-bottom: 1.2rem !important;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-        position: relative !important;
-        overflow: hidden !important;
+        padding: 2rem !important;
+        margin-bottom: 1.5rem !important;
+        transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }}
     .yt-level-card:hover {{
-        border-color: {C_ACCENT} !important;
-        transform: scale(1.02) translateY(-5px) !important;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 20px rgba(124, 106, 247, 0.2) !important;
-    }}
-    .yt-level-tag {{
-        font-size: 14px !important;
-        font-weight: 900 !important;
-        letter-spacing: 0.2em !important;
-        margin-bottom: 12px !important;
-        text-shadow: 0 0 10px rgba(255,255,255,0.2) !important;
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: rgba(255, 255, 255, 0.2) !important;
+        transform: translateX(10px) !important;
     }}
     .yt-title {{
-        font-size: 22px !important;
-        font-weight: 900 !important;
-        line-height: 1.2 !important;
+        font-size: 24px !important;
+        font-weight: 800 !important;
         color: white !important;
+        line-height: 1.3 !important;
         text-decoration: none !important;
+        margin-bottom: 12px !important;
         display: block !important;
-        margin-bottom: 10px !important;
-    }}
-    .yt-meta {{
-        font-size: 15px !important;
-        color: {C_MUTED} !important;
-        background: rgba(0,0,0,0.3) !important;
-        padding: 8px 12px !important;
-        border-radius: 10px !important;
-        display: inline-block !important;
-    }}
-    
-    /* ANIMATIONS FOR EYE CATCHING */
-    @keyframes float {{
-        0% {{ transform: translateY(0px); }}
-        50% {{ transform: translateY(-10px); }}
-        100% {{ transform: translateY(0px); }}
-    }}
-    .pulse-glow {{
-        animation: pulseGlow 3s infinite alternate ease-in-out !important;
-    }}
-    @keyframes pulseGlow {{
-        from {{ box-shadow: 0 0 5px rgba(124, 106, 247, 0.2); }}
-        to {{ box-shadow: 0 0 25px rgba(124, 106, 247, 0.5); }}
     }}
 
     .report-card {{
-        background: {C_CARD_BG} !important;
-        backdrop-filter: blur(20px) !important;
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(2, 6, 23, 0.9)) !important;
+        backdrop-filter: blur(40px) !important;
         border: 1px solid {C_BORDER} !important;
-        border-radius: 24px !important;
-        padding: 2.5rem !important;
-        margin-bottom: 2rem !important;
+        border-radius: 40px !important;
+        padding: 4rem !important;
+        margin-bottom: 4rem !important;
+        box-shadow: 0 100px 150px -50px rgba(0, 0, 0, 0.7) !important;
     }}
+    
     .metric-pill {{
-        background: rgba(255, 255, 255, 0.03) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        border-radius: 16px !important;
-        padding: 18px 24px !important;
+        background: rgba(255, 255, 255, 0.02) !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+        border-radius: 24px !important;
+        padding: 24px 32px !important;
         text-align: center !important;
-        flex: 1 !important;
+        min-width: 180px !important;
     }}
-    .metric-value {{ font-size: 36px !important; font-weight: 800 !important; color: {C_TEXT} !important; }}
-    .metric-label {{ font-size: 13px !important; font-weight: 700 !important; color: {C_MUTED} !important; text-transform: uppercase !important; letter-spacing: 0.15em !important; }}
+    .metric-value {{ 
+        font-size: 48px !important; 
+        font-weight: 800 !important; 
+        line-height: 1 !important;
+        margin-bottom: 8px !important;
+        background: linear-gradient(to bottom, #FFF, #94A3B8);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }}
+    .metric-label {{ font-size: 14px !important; font-weight: 800 !important; color: {C_MUTED} !important; text-transform: uppercase !important; letter-spacing: 0.2em !important; }}
     
     .section-title {{
-        font-size: 16px !important;
+        font-size: 18px !important;
         font-weight: 900 !important;
         text-transform: uppercase !important;
-        letter-spacing: 0.2em !important;
+        letter-spacing: 0.3em !important;
         color: {C_ACCENT} !important;
-        margin: 4rem 0 2rem !important;
+        margin: 5rem 0 3rem !important;
         display: flex !important;
         align-items: center !important;
-        gap: 12px !important;
+        gap: 20px !important;
     }}
     .section-title::after {{ content: ""; flex: 1; height: 1px; background: linear-gradient(to right, {C_ACCENT}, transparent); }}
     
-    .badge {{ padding: 8px 16px !important; border-radius: 10px !important; font-size: 13px !important; font-weight: 800 !important; text-transform: uppercase !important; }}
-    .badge-strong {{ background: rgba(99, 153, 34, 0.15) !important; color: {C_STRONG} !important; border: 1px solid {C_STRONG} !important; }}
-    .badge-developing {{ background: rgba(239, 159, 39, 0.15) !important; color: {C_DEVELOPING} !important; border: 1px solid {C_DEVELOPING} !important; }}
-    .badge-gap {{ background: rgba(226, 75, 74, 0.15) !important; color: {C_GAP} !important; border: 1px solid {C_GAP} !important; }}
+    .badge {{ 
+        padding: 10px 20px !important; 
+        border-radius: 14px !important; 
+        font-size: 14px !important; 
+        font-weight: 900 !important; 
+        text-transform: uppercase !important; 
+        letter-spacing: 0.1em !important;
+    }}
+    .badge-strong {{ background: rgba(16, 185, 129, 0.1) !important; color: {C_STRONG} !important; border: 1px solid rgba(16, 185, 129, 0.3) !important; box-shadow: 0 0 20px rgba(16, 185, 129, 0.1); }}
+    .badge-developing {{ background: rgba(251, 191, 36, 0.1) !important; color: {C_DEVELOPING} !important; border: 1px solid rgba(251, 191, 36, 0.3) !important; }}
+    .badge-gap {{ background: rgba(244, 63, 94, 0.1) !important; color: {C_GAP} !important; border: 1px solid rgba(244, 63, 94, 0.3) !important; box-shadow: 0 0 20px rgba(244, 63, 94, 0.1); }}
     </style>
     """, unsafe_allow_html=True)
 
@@ -228,13 +219,15 @@ def _block1_header(plan: LearningPlan, assessments: list[SkillAssessment]):
 
         st.markdown(f"""
         <div class="report-card">
-            <h1 style="margin:0; font-size: 48px; font-weight: 800; background: linear-gradient(45deg, #FFF, {C_ACCENT}); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{name}</h1>
-            <div style="color: {C_STRONG}; font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 0.2em; margin-top: 6px;">{role}</div>
-            <div style="display: flex; gap: 14px; flex-wrap: wrap; margin-top: 2rem;">
-                <div class="metric-pill"><div class="metric-value">{weeks}w</div><div class="metric-label">Timeline</div></div>
+            <div style="font-size: 14px; font-weight: 900; color: {C_ACCENT}; text-transform: uppercase; letter-spacing: 0.4em; margin-bottom: 1rem;">INTELLIGENCE REPORT</div>
+            <h1 style="margin:0; font-size: 84px; font-weight: 800; line-height: 0.9; letter-spacing: -0.04em; background: linear-gradient(135deg, #FFF 0%, #A78BFA 50%, #10B981 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{name}</h1>
+            <div style="color: {C_MUTED}; font-weight: 600; font-size: 20px; margin-top: 1rem;">Targeting: <span style="color: {C_STRONG}; font-weight: 800;">{role}</span></div>
+            
+            <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 4rem;">
+                <div class="metric-pill"><div class="metric-value">{weeks}w</div><div class="metric-label">Roadmap</div></div>
                 <div class="metric-pill"><div class="metric-value">{n_skills}</div><div class="metric-label">Nodes</div></div>
-                <div class="metric-pill"><div class="metric-value" style="color:{C_GAP}">{gaps}</div><div class="metric-label">Gaps</div></div>
-                <div class="metric-pill"><div class="metric-value" style="color:{C_STRONG}">{score}%</div><div class="metric-label">Ready</div></div>
+                <div class="metric-pill"><div class="metric-value" style="background:linear-gradient(to bottom, #F43F5E, #E11D48); -webkit-background-clip:text;">{gaps}</div><div class="metric-label">Gaps</div></div>
+                <div class="metric-pill"><div class="metric-value" style="background:linear-gradient(to bottom, #10B981, #059669); -webkit-background-clip:text;">{score}%</div><div class="metric-label">Ready</div></div>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -325,17 +318,29 @@ def _block5_timeline(plan: LearningPlan):
                 adj_html = " ".join([f"<span style='background:rgba(255,255,255,0.05); border:1px solid {C_BORDER}; border-radius:6px; padding:4px 8px; font-size:10px; color:{C_MUTED};'>#{html.escape(s)}</span>" for s in adj_skills])
                 
                 sp_name = html.escape(sp.skill_name)
-                st.markdown(f'<div class="skill-header"><div><div style="font-size:10px; font-weight:800; color:{C_MUTED}; text-transform:uppercase; letter-spacing:0.2em;">COGNITIVE NODE</div><div style="font-size:32px; font-weight:800; color:{C_TEXT};">{sp_name}</div><div style="display:flex; gap:8px; margin-top:12px;">{adj_html}</div></div><div style="text-align:right;"><div class="badge badge-{sp.category.lower()}">{sp.category}</div><div style="font-size:24px; font-weight:800; color:{C_TEXT}; margin-top:10px;">{sp.total_weeks} <span style="font-size:12px; color:{C_MUTED};">WEEKS</span></div></div></div>', unsafe_allow_html=True)
+                st.markdown(f'''
+                    <div class="skill-header">
+                        <div>
+                            <div style="font-size:12px; font-weight:900; color:{C_ACCENT}; text-transform:uppercase; letter-spacing:0.3em; margin-bottom:0.5rem;">COGNITIVE NODE</div>
+                            <div style="font-size:64px; font-weight:800; color:white; line-height:1; letter-spacing:-0.02em;">{sp_name}</div>
+                            <div style="display:flex; gap:12px; margin-top:2rem;">{adj_html}</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div class="badge badge-{sp.category.lower()}">{sp.category}</div>
+                            <div style="font-size:32px; font-weight:800; color:white; margin-top:1.5rem;">{sp.total_weeks} <span style="font-size:14px; color:{C_MUTED}; letter-spacing:0.1em;">WEEKS</span></div>
+                        </div>
+                    </div>
+                ''', unsafe_allow_html=True)
                 
                 # --- NEW FEEDBACK SECTION ---
                 feedback = getattr(sp, 'candidate_feedback', "")
                 if feedback:
                     st.markdown(f'''
-                        <div style="background: rgba(124, 106, 247, 0.03); border: 1px dashed {C_ACCENT}; border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem;">
-                            <div style="font-size: 11px; font-weight: 900; color: {C_ACCENT}; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 8px;">
-                                <span style="font-size: 16px;">◈</span> PERSONALIZED FEEDBACK
+                        <div style="background: linear-gradient(to right, rgba(124, 106, 247, 0.05), transparent); border-left: 4px solid {C_ACCENT}; border-radius: 0 20px 20px 0; padding: 2.5rem; margin-bottom: 3rem;">
+                            <div style="font-size: 13px; font-weight: 900; color: {C_ACCENT}; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 20px;">◈</span> PERSONALIZED FEEDBACK
                             </div>
-                            <div style="font-size: 15px; line-height: 1.6; color: {C_TEXT}; font-style: italic;">
+                            <div style="font-size: 18px; line-height: 1.7; color: {C_TEXT}; font-style: italic; font-weight: 500;">
                                 "{html.escape(feedback)}"
                             </div>
                         </div>
@@ -343,13 +348,15 @@ def _block5_timeline(plan: LearningPlan):
                 # ----------------------------
 
                 if sp.category == "STRONG":
-                    st.success("Mastery verified. Stay sharp with advanced internals."); continue
+                    st.markdown(f'<div style="background:rgba(16,185,129,0.05); border:1px solid {C_STRONG}; border-radius:20px; padding:2rem; text-align:center; color:{C_STRONG}; font-weight:700;">MASTERY VERIFIED: No additional roadmap required for this node.</div>', unsafe_allow_html=True)
+                    continue
                 
                 topics = getattr(sp, 'topics', [])
                 if not topics: 
                     st.info("Curriculum details pending synthesis."); continue
 
                 week_labels = [t.week_label for t in topics]
+                st.markdown(f'<div style="font-size:12px; font-weight:800; color:{C_MUTED}; margin-bottom:1rem; letter-spacing:0.1em;">SELECT TIMELINE SEGMENT</div>', unsafe_allow_html=True)
                 sel_w = st.radio(f"Select Week for {sp.skill_name}", week_labels, horizontal=True, label_visibility="collapsed", key=f"sel_{sp.skill_name}")
                 topic = next((t for t in topics if t.week_label == sel_w), topics[0])
                 
@@ -359,55 +366,70 @@ def _block5_timeline(plan: LearningPlan):
 def _render_week_content(topic, skill_id):
     t_title = html.escape(topic.title)
     t_obj = html.escape(topic.objective)
-    st.markdown(f'<div style="background:rgba(124, 106, 247, 0.05); border-left:4px solid {C_ACCENT}; padding:1.5rem; border-radius:0 16px 16px 0; margin-bottom:2rem;"><div style="font-size:10px; font-weight:800; color:{C_ACCENT}; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:4px;">OBJECTIVE: {t_title}</div><div style="font-size:16px; color:{C_TEXT}; font-weight:600;">{t_obj}</div></div>', unsafe_allow_html=True)
-    with st.expander("📖 WHAT TO STUDY THIS WEEK", expanded=True):
-        for i, item in enumerate(topic.what_to_study): st.markdown(f"{i+1}. {html.escape(item)}")
+    st.markdown(f'''
+        <div style="background: linear-gradient(135deg, rgba(124, 106, 247, 0.1), transparent); border-left: 6px solid {C_ACCENT}; padding: 2.5rem; border-radius: 0 32px 32px 0; margin-bottom: 3rem; box-shadow: 20px 0 40px -20px rgba(124, 106, 247, 0.2);">
+            <div style="font-size: 14px; font-weight: 900; color: {C_ACCENT}; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 0.5rem;">STRATEGIC OBJECTIVE</div>
+            <div style="font-size: 28px; color: white; font-weight: 800; line-height: 1.2;">{t_title}</div>
+            <div style="font-size: 18px; color: {C_MUTED}; margin-top: 1rem; line-height: 1.6;">{t_obj}</div>
+        </div>
+    ''', unsafe_allow_html=True)
+    
+    with st.expander("📖 CURRICULUM SYLLABUS", expanded=True):
+        st.markdown('<div style="height:10px;"></div>', unsafe_allow_html=True)
+        for i, item in enumerate(topic.what_to_study): 
+            st.markdown(f'''
+                <div style="display: flex; align-items: flex-start; gap: 15px; margin-bottom: 12px;">
+                    <div style="color: {C_ACCENT}; font-weight: 900;">0{i+1}</div>
+                    <div style="font-size: 16px; color: {C_TEXT};">{html.escape(item)}</div>
+                </div>
+            ''', unsafe_allow_html=True)
 
-    col1, col2 = st.columns(2)
+    st.markdown('<div style="height:3rem;"></div>', unsafe_allow_html=True)
+    col1, col2 = st.columns(2, gap="large")
     with col1:
-        docs_html = "".join([f"<div style='margin-bottom:20px;'><a href='{html.escape(d.url)}' target='_blank' style='color:{C_TEXT}; font-weight:800; text-decoration:none; font-size:18px; border-bottom: 1px solid rgba(255,255,255,0.1);'>{html.escape(d.title)}</a><div style='font-size:15px; color:{C_MUTED}; margin-top:6px; line-height:1.5;'>{html.escape(d.description)}</div></div>" for d in topic.documentation])
+        docs_html = "".join([f"<div style='margin-bottom:30px;'><a href='{html.escape(d.url)}' target='_blank' style='color:white; font-weight:800; text-decoration:none; font-size:20px; border-bottom: 1px solid rgba(255,255,255,0.1);'>{html.escape(d.title)}</a><div style='font-size:16px; color:{C_MUTED}; margin-top:8px; line-height:1.6;'>{html.escape(d.description)}</div></div>" for d in topic.documentation])
         st.markdown(f'<div class="res-box"><div class="res-box-title">Official Documentation</div>{docs_html}</div>', unsafe_allow_html=True)
-        st.markdown('<div style="height:1.5rem;"></div>', unsafe_allow_html=True)
-        assets_html = "".join([f"<div style='margin-bottom:15px; padding: 12px; background: rgba(124, 106, 247, 0.05); border-radius: 10px;'><span class='badge' style='background:rgba(124, 106, 247, 0.2); border:1px solid {C_ACCENT}; font-size:11px; padding:4px 10px; margin-right:10px;'>{html.escape(r.type).upper()}</span> <a href='{html.escape(r.url)}' target='_blank' style='color:{C_TEXT}; font-weight:800; text-decoration:none; font-size:16px;'>{html.escape(r.title)}</a></div>" for r in topic.extra_resources])
-        st.markdown(f'<div class="res-box"><div class="res-box-title">Deep Dive Assets</div>{assets_html}</div>', unsafe_allow_html=True)
+        st.markdown('<div style="height:2rem;"></div>', unsafe_allow_html=True)
+        assets_html = "".join([f"<div style='margin-bottom:15px; padding: 16px; background: rgba(255, 255, 255, 0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);'><span class='badge' style='background:rgba(124, 106, 247, 0.1); color:{C_ACCENT}; font-size:11px; padding:6px 12px; margin-right:15px; border: 1px solid rgba(124,106,247,0.2);'>{html.escape(r.type).upper()}</span> <a href='{html.escape(r.url)}' target='_blank' style='color:white; font-weight:700; text-decoration:none; font-size:17px;'>{html.escape(r.title)}</a></div>" for r in topic.extra_resources])
+        st.markdown(f'<div class="res-box"><div class="res-box-title">Neural Deep Dives</div>{assets_html}</div>', unsafe_allow_html=True)
     with col2:
         yt = topic.youtube
         st.markdown(f"""
-        <div class="res-box pulse-glow" style="border-top: 4px solid {C_GAP};">
-            <div class="res-box-title" style="color: {C_GAP} !important;">🔥 Visual Intelligence (3 Levels)</div>
+        <div class="res-box" style="border-top: 4px solid {C_GAP}; background: linear-gradient(to bottom, rgba(244, 63, 94, 0.05), transparent);">
+            <div class="res-box-title" style="color: {C_GAP} !important;">🔥 Visual Training (3 Levels)</div>
             <div class="yt-level-card">
-                <div class="yt-level-tag" style="color:{C_STRONG}">⚡ LEVEL 1: EASY</div>
+                <div style="font-size:12px; font-weight:900; color:{C_STRONG}; margin-bottom:8px; letter-spacing:0.1em;">PHASE 01: CONCEPTUAL</div>
                 <a href="{html.escape(yt.easy.url)}" target="_blank" class="yt-title">{html.escape(yt.easy.title)}</a>
-                <div class="yt-meta">📺 {html.escape(yt.easy.channel)} • <span style="color:{C_STRONG}; font-weight:900;">{html.escape(yt.easy.why)}</span></div>
+                <div style="font-size:14px; color:{C_MUTED};">📺 {html.escape(yt.easy.channel)} • <span style="color:{C_STRONG}; font-weight:800;">{html.escape(yt.easy.why)}</span></div>
             </div>
             <div class="yt-level-card">
-                <div class="yt-level-tag" style="color:{C_DEVELOPING}">🚀 LEVEL 2: MEDIUM</div>
+                <div style="font-size:12px; font-weight:900; color:{C_DEVELOPING}; margin-bottom:8px; letter-spacing:0.1em;">PHASE 02: ARCHITECTURAL</div>
                 <a href="{html.escape(yt.medium.url)}" target="_blank" class="yt-title">{html.escape(yt.medium.title)}</a>
-                <div class="yt-meta">📺 {html.escape(yt.medium.channel)} • <span style="color:{C_DEVELOPING}; font-weight:900;">{html.escape(yt.medium.why)}</span></div>
+                <div style="font-size:14px; color:{C_MUTED};">📺 {html.escape(yt.medium.channel)} • <span style="color:{C_DEVELOPING}; font-weight:800;">{html.escape(yt.medium.why)}</span></div>
             </div>
             <div class="yt-level-card">
-                <div class="yt-level-tag" style="color:{C_GAP}">💀 LEVEL 3: HARD</div>
+                <div style="font-size:12px; font-weight:900; color:{C_GAP}; margin-bottom:8px; letter-spacing:0.1em;">PHASE 03: INTERNAL DEEP DIVE</div>
                 <a href="{html.escape(yt.hard.url)}" target="_blank" class="yt-title">{html.escape(yt.hard.title)}</a>
-                <div class="yt-meta">📺 {html.escape(yt.hard.channel)} • <span style="color:{C_GAP}; font-weight:900;">{html.escape(yt.hard.why)}</span></div>
+                <div style="font-size:14px; color:{C_MUTED};">📺 {html.escape(yt.hard.channel)} • <span style="color:{C_GAP}; font-weight:800;">{html.escape(yt.hard.why)}</span></div>
             </div>
         </div>
         """, unsafe_allow_html=True)
-        st.markdown('<div style="height:1.5rem;"></div>', unsafe_allow_html=True)
+        st.markdown('<div style="height:2rem;"></div>', unsafe_allow_html=True)
         t_ho = html.escape(topic.hands_on)
         t_ms = html.escape(topic.milestone)
-        st.markdown(f'<div class="res-box"><div class="res-box-title">Tactical Execution</div><div style="font-size:15px; font-weight:700; color:{C_TEXT}; margin-bottom:10px;">{t_ho}</div><div style="background:rgba(99,153,34,0.1); border:1px solid {C_STRONG}; border-radius:10px; padding:12px;"><div style="color:{C_STRONG}; font-size:10px; font-weight:800; margin-bottom:4px;">MILESTONE</div><div style="font-size:13px; color:{C_TEXT};">{t_ms}</div></div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="res-box"><div class="res-box-title">Tactical Project</div><div style="font-size:18px; font-weight:800; color:white; margin-bottom:15px; line-height:1.4;">{t_ho}</div><div style="background:rgba(16,185,129,0.05); border:1px solid {C_STRONG}; border-radius:16px; padding:20px;"><div style="color:{C_STRONG}; font-size:12px; font-weight:900; margin-bottom:8px; letter-spacing:0.1em;">COMPLETION MILESTONE</div><div style="font-size:15px; color:white; line-height:1.5;">{t_ms}</div></div></div>', unsafe_allow_html=True)
 
 def _block7_readiness(plan: LearningPlan):
     try:
         st.markdown('<div class="section-title">Readiness Pulse</div>', unsafe_allow_html=True)
         score = getattr(plan, 'readiness_score', 0)
-        fig = go.Figure(go.Indicator(mode="gauge+number", value=score, number={'suffix': "%", 'font': {'size': 60, 'color': C_TEXT}}, gauge={'axis': {'range': [0, 100]}, 'bar': {'color': C_STRONG if score > 70 else C_DEVELOPING if score > 40 else C_GAP}, 'bgcolor': "rgba(255,255,255,0.02)", 'steps': [{'range': [0, 40], 'color': 'rgba(226,75,74,0.05)'}, {'range': [40, 70], 'color': 'rgba(239,159,39,0.05)'}, {'range': [70, 100], 'color': 'rgba(99,153,34,0.05)'}]}))
-        st.plotly_chart(_plotly_layout(fig, height=250), use_container_width=True)
+        fig = go.Figure(go.Indicator(mode="gauge+number", value=score, number={'suffix': "%", 'font': {'size': 80, 'color': 'white', 'family': 'JetBrains Mono'}}, gauge={'axis': {'range': [0, 100], 'tickwidth': 1, 'tickcolor': "rgba(255,255,255,0.1)"}, 'bar': {'color': C_STRONG if score > 70 else C_DEVELOPING if score > 40 else C_GAP, 'thickness': 1}, 'bgcolor': "rgba(255,255,255,0.01)", 'steps': [{'range': [0, 100], 'color': 'rgba(255,255,255,0.02)'}]}))
+        st.plotly_chart(_plotly_layout(fig, height=300), use_container_width=True)
     except Exception as e: st.error(f"Readiness Error: {e}")
 
 def _block8_motivation(plan: LearningPlan):
     try:
         st.markdown('<div class="section-title">Intelligence Synthesis</div>', unsafe_allow_html=True)
         summary = html.escape(getattr(plan, 'summary', 'Processing complete.'))
-        st.markdown(f'<div style="background:{C_CARD_BG}; backdrop-filter:blur(20px); border:1px solid {C_BORDER}; border-radius:20px; padding:2rem; line-height:1.8; font-size:16px; border-left:6px solid {C_ACCENT};">{summary}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(2, 6, 23, 1)); border: 1px solid {C_BORDER}; border-radius: 32px; padding: 4rem; line-height: 2; font-size: 20px; color: #E2E8F0; box-shadow: 0 40px 80px -20px rgba(0,0,0,0.5);">{summary}</div>', unsafe_allow_html=True)
     except Exception as e: st.error(f"Motivation Error: {e}")
