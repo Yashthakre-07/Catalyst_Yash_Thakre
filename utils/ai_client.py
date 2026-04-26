@@ -44,13 +44,27 @@ class AIClient:
 
     def _discover_keys(self, prefix: str) -> list[str]:
         import os
+        try:
+            import streamlit as st
+            st_secrets = st.secrets
+        except:
+            st_secrets = {}
+
         keys = []
-        base_key = os.getenv(prefix)
-        if base_key: keys.append(base_key)
-        for i in range(1, 11):
-            key = os.getenv(f"{prefix}{i}")
-            if key and key not in keys: keys.append(key)
-        return keys
+        # Check index 0 (the base key) and 1-10
+        for i in range(11):
+            env_key = f"{prefix}{i}" if i > 0 else prefix
+            
+            # Try environment variable first
+            val = os.getenv(env_key)
+            
+            # If not found, try Streamlit secrets
+            if not val and env_key in st_secrets:
+                val = st_secrets[env_key]
+                
+            if val:
+                keys.append(val)
+        return list(dict.fromkeys(keys)) # Remove duplicates
 
     def complete(
         self,
