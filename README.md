@@ -10,6 +10,8 @@
 
 ### *The future of precision hiring. Real-time intelligence probes, automated skill-gap analysis, and cinematic learning roadmaps.*
 
+**Live Deployment:** [https://catalyst-yt.streamlit.app/](https://catalyst-yt.streamlit.app/)
+
 ---
 
 ## 📌 Problem Statement
@@ -230,10 +232,13 @@ skill-assessment-agent/
 
 ## 🔐 API / Environment Variables
 
+The system features an **Autonomous Key Rotation** engine. It scans for primary keys and indexed fallbacks (up to 10 keys per provider) to ensure high availability and bypass rate limits.
+
 | Variable | Type | Description |
 | :--- | :--- | :--- |
-| `GEMINI_API_KEY` | Secret | Primary key for Google Gemini Flash models. |
-| `GROQ_API_KEY` | Secret | Primary key for Llama 3.3 high-speed inference. |
+| `GEMINI_API_KEY` | Secret | Primary Gemini Flash key. Fallbacks: `GEMINI_API_KEY1`, `GEMINI_API_KEY2`... |
+| `GROQ_API_KEY` | Secret | Primary Groq Llama 3 key. Fallbacks: `GROQ_API_KEY1`, `GROQ_API_KEY2`... |
+| `NVIDIA_API_KEY` | Secret | Optional fallback for NVIDIA NIM microservices. |
 | `MAX_QUESTIONS` | Config | Sets the depth of the intelligence probe (Default: 3). |
 | `AI_PROVIDER` | Config | Selects primary provider (`groq` or `gemini`). |
 
