@@ -49,9 +49,14 @@ class AIClient:
 
     def _discover_keys(self, prefix: str) -> list[str]:
         import os
+        st_secrets = {}
         try:
             import streamlit as st
-            st_secrets = st.secrets
+            try:
+                # We try to convert to dict to trigger the parse early and catch any errors
+                st_secrets = dict(st.secrets)
+            except:
+                st_secrets = {}
         except:
             st_secrets = {}
 
@@ -69,7 +74,7 @@ class AIClient:
                 
             if val:
                 # CLEANING: Remove any accidental quotes or spaces
-                cleaned_val = val.strip().replace('"', '').replace("'", "")
+                cleaned_val = str(val).strip().replace('"', '').replace("'", "")
                 keys.append(cleaned_val)
         return list(dict.fromkeys(keys)) # Remove duplicates
 
