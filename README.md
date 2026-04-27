@@ -172,31 +172,58 @@ graph LR
 
 ---
 
-## 🛠️ 9. Installation & Setup
+## 🛠️ 9. Full Local Execution Guide
 
-### 1. Repository Setup
+Follow these steps to set up a production-grade local environment for NeuralHire.
+
+### Prerequisites
+*   **Python 3.12+**: Ensure you have the latest Python version installed.
+*   **Git**: For repository cloning.
+*   **Virtual Environment**: Highly recommended to avoid dependency conflicts.
+
+### Step 1: Clone & Environment Setup
 ```bash
+# Clone the repository
 git clone https://github.com/Yashthakre-07/Catalyst_Yash_Thakre.git
 cd Catalyst_Yash_Thakre
+
+# Create a virtual environment
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# Activate the environment
+# Windows:
+venv\Scripts\activate
+# macOS/Linux:
+source venv/bin/activate
 ```
 
-### 2. Dependency Management
+### Step 2: Install Dependencies
+The project uses `requirements.txt` for streamlined dependency management.
 ```bash
+pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### 3. Environment Configuration
-Create a `.env` file in the root directory:
+### Step 3: API Key & Environment Configuration
+NeuralHire supports **Multi-Key Rotation** to bypass rate limits. Create a `.env` file in the root directory:
+
 ```env
-GEMINI_API_KEY="your_primary_key"
-GEMINI_API_KEY1="rotation_key_1"
-GROQ_API_KEY="your_primary_key"
-AI_PROVIDER="groq" # or "gemini"
+# Primary Keys
+GEMINI_API_KEY="your_google_gemini_key_here"
+GROQ_API_KEY="your_groq_llama_key_here"
+
+# Optional Rotation Keys (Add as many as you want)
+GEMINI_API_KEY1="second_key"
+GEMINI_API_KEY2="third_key"
+GROQ_API_KEY1="second_groq_key"
+
+# Configuration
+AI_PROVIDER="groq"        # Default provider (groq or gemini)
+MAX_QUESTIONS=3           # Questions per skill node
 ```
 
-### 4. Application Launch
+### Step 4: Launch the Engine
+Run the Streamlit server to initiate the local dashboard:
 ```bash
 streamlit run main.py
 ```
