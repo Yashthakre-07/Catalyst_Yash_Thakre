@@ -290,5 +290,5 @@ Contributions are welcome. Please follow the standard fork-and-pull-request work
 ---
 
 <p align="center">
-  <b>NeuralHire</b> • Engineered with 💜 by the Catalyst Team.
+  <b>NeuralHire</b> • Engineered with 💜 by <b>Yash Thakre</b>
 </p>
