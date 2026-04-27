@@ -367,6 +367,7 @@ def _block5_timeline(plan: LearningPlan):
                     st.markdown(f'<div style="background:rgba(16,185,129,0.05); border:1px solid {C_STRONG}; border-radius:20px; padding:2rem; text-align:center; color:{C_STRONG}; font-weight:700;">MASTERY VERIFIED: No additional roadmap required for this node.</div>', unsafe_allow_html=True)
                     continue
                 
+                topics = getattr(sp, 'topics', [])
                 if not topics:
                     st.markdown(f'''
                         <div style="background:rgba(255,255,255,0.02); border:1px dashed {C_BORDER}; border-radius:24px; padding:4rem; text-align:center; margin-top:2rem;">
