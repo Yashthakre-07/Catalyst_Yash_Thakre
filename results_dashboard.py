@@ -193,6 +193,22 @@ def render_dashboard(plan: LearningPlan, assessments: list[SkillAssessment]):
     </style>
     """, unsafe_allow_html=True)
 
+    # Deduplicate skills by name (keeping the one with higher level/more info)
+    seen_skills = {}
+    unique_skills = []
+    for sp in plan.skills:
+        if sp.skill_name not in seen_skills:
+            seen_skills[sp.skill_name] = sp
+            unique_skills.append(sp)
+        else:
+            # If current one has topics and the seen one doesn't, swap
+            if sp.topics and not seen_skills[sp.skill_name].topics:
+                idx = unique_skills.index(seen_skills[sp.skill_name])
+                unique_skills[idx] = sp
+                seen_skills[sp.skill_name] = sp
+    
+    plan.skills = unique_skills
+
     _block1_header(plan, assessments)
     
     c_bar, c_radar = st.columns([1.2, 1], gap="large")
