@@ -103,7 +103,7 @@ elif st.session_state.phase == "step_jd":
             if jd_file: jd_input = extract_text_from_pdf(jd_file.read())
 
         st.markdown("<div style='margin-top:1.25rem;'>", unsafe_allow_html=True)
-        if st.button("Analyze Requirement", key="jd_next", use_container_width=True):
+        if st.button("Analyze Requirement", key="jd_next", width="stretch"):
             if jd_input and jd_input.strip():
                 st.session_state.jd_text = jd_input
                 st.session_state.phase = "processing_jd"
@@ -130,10 +130,10 @@ elif st.session_state.phase == "step_resume":
         st.markdown("<div style='margin-top:1.25rem;'>", unsafe_allow_html=True)
         c_back, c_next = st.columns([0.4, 1.6])
         with c_back:
-            if st.button("Back", key="rb", use_container_width=True):
+            if st.button("Back", key="rb", width="stretch"):
                 st.session_state.phase = "step_jd"; st.rerun()
         with c_next:
-            if st.button("Initiate Assessment", key="rn", use_container_width=True):
+            if st.button("Initiate Assessment", key="rn", width="stretch"):
                 if res_input and res_input.strip():
                     st.session_state.resume_text = res_input
                     st.session_state.phase = "processing_resume"
@@ -263,11 +263,11 @@ elif st.session_state.phase == "assessing":
     # ── Action Buttons ──
     c1, c2 = st.columns(2)
     with c1:
-        if st.button("Skip Skill →", key="skip_skill", use_container_width=True):
+        if st.button("Skip Skill →", key="skip_skill", width="stretch"):
             agent.score_current_skill()
             st.rerun()
     with c2:
-        if st.button("Finish All →", key="finish_all", use_container_width=True):
+        if st.button("Finish All →", key="finish_all", width="stretch"):
             while agent.current_skill_index < len(skills):
                 agent.score_current_skill()
             st.session_state.phase = "generating_results"
@@ -334,13 +334,12 @@ elif st.session_state.phase == "results":
         # ── PDF Download Button ──
         c1, c2 = st.columns([1, 4])
         with c1:
-            pdf_buffer = generate_plan_pdf(plan)
             st.download_button(
                 label="◈ DOWNLOAD PDF REPORT",
                 data=pdf_buffer,
                 file_name=f"NeuralPlan_{plan.candidate_name}.pdf",
                 mime="application/pdf",
-                use_container_width=True
+                width="stretch"
             )
         st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
         

@@ -254,7 +254,7 @@ def _block2_bar_chart(plan: LearningPlan):
         for i, row in df.iterrows():
             fig.add_shape(type="line", x0=row["Target"], x1=row["Target"], y0=i-0.4, y1=i+0.4, line=dict(color="white", width=2, dash="dot"))
         fig.update_yaxes(autorange="reversed")
-        st.plotly_chart(_plotly_layout(fig, height=max(300, len(df)*45)), use_container_width=True)
+        st.plotly_chart(_plotly_layout(fig, height=max(300, len(df)*45)), width="stretch")
     except Exception as e: st.error(f"Bar Error: {e}")
 
 def _block3_radar(plan: LearningPlan):
@@ -271,7 +271,7 @@ def _block3_radar(plan: LearningPlan):
         fig.add_trace(go.Scatterpolar(r=required, theta=skills, fill='toself', fillcolor='rgba(255,255,255,0.02)', line=dict(color="rgba(255,255,255,0.2)", width=1, dash='dot'), name='Target'))
         fig.add_trace(go.Scatterpolar(r=assessed, theta=skills, fill='toself', fillcolor='rgba(99,153,34,0.2)', line=dict(color=C_STRONG, width=3), name='Actual'))
         fig.update_layout(polar=dict(bgcolor="rgba(0,0,0,0)", radialaxis=dict(visible=True, range=[0, 10])))
-        st.plotly_chart(_plotly_layout(fig, height=400), use_container_width=True)
+        st.plotly_chart(_plotly_layout(fig, height=400), width="stretch")
     except Exception as e: st.error(f"Radar Error: {e}")
 
 def _block4_leverage_cards(plan: LearningPlan):
@@ -304,7 +304,7 @@ def _block5_timeline(plan: LearningPlan):
         df = pd.DataFrame(rows)
         fig = px.timeline(df, x_start="Start", x_end="Finish", y="Skill", color="Category", color_discrete_map={"GAP": C_GAP, "DEVELOPING": C_DEVELOPING, "STRONG": C_STRONG})
         fig.update_yaxes(autorange="reversed")
-        st.plotly_chart(_plotly_layout(fig, height=max(200, len(rows)*40 + 80)), use_container_width=True)
+        st.plotly_chart(_plotly_layout(fig, height=max(200, len(rows)*40 + 80)), width="stretch")
 
         # 2. Skill Tabs Overhaul
         st.markdown('<div style="height: 40px;"></div>', unsafe_allow_html=True)
@@ -434,7 +434,7 @@ def _block7_readiness(plan: LearningPlan):
         st.markdown('<div class="section-title">Readiness Pulse</div>', unsafe_allow_html=True)
         score = getattr(plan, 'readiness_score', 0)
         fig = go.Figure(go.Indicator(mode="gauge+number", value=score, number={'suffix': "%", 'font': {'size': 80, 'color': 'white', 'family': 'JetBrains Mono'}}, gauge={'axis': {'range': [0, 100], 'tickwidth': 1, 'tickcolor': "rgba(255,255,255,0.1)"}, 'bar': {'color': C_STRONG if score > 70 else C_DEVELOPING if score > 40 else C_GAP, 'thickness': 1}, 'bgcolor': "rgba(255,255,255,0.01)", 'steps': [{'range': [0, 100], 'color': 'rgba(255,255,255,0.02)'}]}))
-        st.plotly_chart(_plotly_layout(fig, height=300), use_container_width=True)
+        st.plotly_chart(_plotly_layout(fig, height=300), width="stretch")
     except Exception as e: st.error(f"Readiness Error: {e}")
 
 def _block8_motivation(plan: LearningPlan):
