@@ -1,277 +1,135 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/Production-Ready-emerald?style=for-the-badge&logo=checkmarx" />
+  <img src="https://img.shields.io/badge/Production--Ready-emerald?style=for-the-badge&logo=checkmarx" />
   <img src="https://img.shields.io/badge/Python-3.12-blue?style=for-the-badge&logo=python&logoColor=white" />
-  <img src="https://img.shields.io/badge/Streamlit-1.35+-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white" />
-  <img src="https://img.shields.io/badge/LLM-Llama3_&_Gemini-8B5CF6?style=for-the-badge&logo=meta&logoColor=white" />
-  <img src="https://img.shields.io/badge/License-MIT-gray?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Streamlit-1.56+-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white" />
+  <img src="https://img.shields.io/badge/LLM-Llama3.3_&_Gemini-8B5CF6?style=for-the-badge&logo=meta&logoColor=white" />
 </p>
 
 # ◈ NeuralHire: Autonomous Skill Assessment Engine
 
-### *The future of precision hiring. Real-time intelligence probes, automated skill-gap analysis, and cinematic learning roadmaps.*
+### *Bridging the Hiring Gap through High-Fidelity Intelligence Probes and Dynamic Learning Synthesis.*
 
 ---
 
-## 📌 Problem Statement
-
-### The "Hiring Gap" & Assessment Friction
-In the modern tech landscape, traditional recruitment is broken. Recruiters spend **thousands of hours** manually screening resumes that don't reflect actual skill, while candidates receive **zero feedback** from automated rejection systems.
-
-*   **For Recruiters:** High noise-to-signal ratio. Resumes are static and often exaggerated.
-*   **For Candidates:** "Black hole" applications. No understanding of *why* they weren't a fit or *how* to improve.
-*   **The Cost:** Companies lose top talent due to slow screening, and talented individuals stay stagnant due to lack of guidance.
+![NeuralHire Hero](assets/hero_screenshot.png)
+*The NeuralHire Landing Page: A cinematic gateway to autonomous technical evaluation.*
 
 ---
 
-## 💡 Solution Overview
+## 📌 The "Hiring Gap" Problem
+Traditional recruitment is plagued by static data and zero-feedback loops:
+*   **Recruiters** waste 60% of their time screening resumes that exaggerate skills.
+*   **Candidates** suffer from "Black Hole" applications with no guidance on how to improve.
+*   **The Result:** A friction-heavy market where talent is misaligned and growth is stagnant.
 
-**NeuralHire** is a production-grade, multi-provider AI system designed to bridge the gap between job requirements and candidate reality. 
-
-Unlike simple "matching" algorithms, NeuralHire acts as an **Autonomous Interviewer**. It doesn't just read a resume; it **validates** it through dynamic, context-aware "Intelligence Probes" (live assessments).
-
-### What makes it unique?
-1.  **Adaptive Intelligence:** Questions evolve based on previous answers. It probes deep into claimed expertise.
-2.  **The "Bridge" Philosophy:** It doesn't just reject; it **diagnoses**. If a candidate has a gap, it builds the bridge to cross it.
-3.  **Neural Dark UI:** A premium, cinematic interface that turns a stressful assessment into an immersive experience.
+**NeuralHire** acts as the missing link. It doesn't just "match" keywords; it **validates** technical depth through adaptive AI-led interviews and **diagnoses** specific gaps to build a 12-week roadmap for candidate success.
 
 ---
 
-## 🏗️ System Architecture
+## 🏗️ System Architecture: The Agentic Brain
 
-NeuralHire follows a decoupled, agentic architecture where a central orchestrator manages specialized intelligence modules.
+NeuralHire follows a modular, agent-driven architecture where a central orchestrator manages specialized intelligence units.
 
 ```mermaid
 flowchart TD
-    subgraph Client_Layer [Frontend & UI]
-        User((User)) --> UI[Streamlit Neural Dark UI]
-        UI --> CSS[Custom Style Engine]
+    subgraph UI_Layer [Neural Dark Interface]
+        U((User)) --> ST[Streamlit Dashboard]
+        ST --> CSS[Custom Neural CSS Engine]
     end
 
-    subgraph Orchestration_Layer [The AI Brain]
-        UI <--> Agent{AssessmentAgent}
-        Agent --> P_JD[JD Parser]
-        Agent --> P_RES[Resume Parser]
+    subgraph Orchestration [The Agentic Core]
+        ST <--> Agent{AssessmentAgent}
+        Agent --> P_JD[JD Intelligence Parser]
+        Agent --> P_RES[Resume Profile Decoder]
         Agent --> ASS[Adaptive Assessor]
-        Agent --> SCO[Intelligence Scorer]
-        Agent --> PLN[Roadmap Planner]
+        Agent --> SCO[Technical Scorer]
+        Agent --> PLN[Curriculum Planner]
     end
 
-    subgraph Intelligence_Layer [AI Engine]
-        P_JD & P_RES & ASS & SCO & PLN --> Router{AIClient Manager}
-        Router -->|Primary| Groq[Groq Llama 3.3]
-        Router -->|Fallback| Gemini[Google Gemini Flash]
+    subgraph Intelligence [Resilient AI Engine]
+        P_JD & P_RES & ASS & SCO & PLN --> Client{AIClient Manager}
+        Client -->|10-Key Rotation| Groq[Groq: Llama 3.3 70B]
+        Client -->|Failover| Gemini[Google: Gemini 1.5 Flash]
     end
 
-    subgraph Output_Layer [Artifacts]
+    subgraph Artifacts [Intelligence Dossier]
         Agent --> Dashboard[Interactive Intelligence Dashboard]
-        Agent --> PDF[Cinematic PDF Report]
+        Agent --> PDF[Cinematic PDF Dossier]
     end
 
-    classDef default fill:#0f172a,stroke:#334155,color:#f8fafc
     classDef highlight fill:#7c6af7,stroke:#a78bfa,color:#fff
     classDef engine fill:#020617,stroke:#10b981,color:#fff
-    class Agent,Router highlight
+    class Agent,Client highlight
     class Groq,Gemini engine
 ```
 
-### Component Deep-Dive
-*   **AssessmentAgent:** The state machine. Manages session flow, conversation history, and cross-module communication.
-*   **AIClient Manager:** A resilient routing layer featuring **10-key rotation** and automatic failover between Groq (for speed) and Gemini (for context).
-*   **Neural Dark PDF Engine:** A programmatic report generator that paints a dark-themed, high-fidelity dossier for every candidate.
+---
+
+## ✨ Key Features
+
+### ⚡ Sub-Second Intelligence Probes
+Powered by **Groq**, the agent conducts live technical screens with sub-500ms latency, making the assessment feel like a real-time conversation with a Senior Engineer.
+
+### 🔄 Multi-Key Resiliency Engine
+The `AIClient` features a production-grade **10-key rotation system** with automatic failover. If a Groq key hits a rate limit, the system instantly switches to Gemini, ensuring zero downtime during high-stakes evaluations.
+
+### 🎨 Neural Dark Visual System
+A bespoke UI built with **Glassmorphism**, HSL-tailored color palettes, and subtle CSS micro-animations. It transforms a standard form into an immersive "Intelligence Scan."
+
+### 📊 Cinematic Intelligence Dossier
+Beyond simple scoring, the system synthesizes a **12-week strategic roadmap**. It curates documentation, YouTube resources (Easy/Medium/Hard), and hands-on milestones tailored to the candidate's specific gap.
 
 ---
 
-## ⚙️ Tech Stack
+## 🛠️ Technical Deep-Dive
 
-### Frontend & UI
-*   **Streamlit (1.35+):** Chosen for rapid deployment and seamless Python integration.
-*   **Vanilla CSS3:** Custom-built "Neural Dark" theme using glassmorphism, HSL-tailored colors, and keyframe animations.
+### The Pipeline
+1.  **Vector Ingestion**: `P_JD` and `P_RES` convert unstructured PDFs into high-dimensional skill profiles using Pydantic validation.
+2.  **Adaptive Probing**: `ASS` generates targeted, scenario-based questions that drill deeper into claimed expertise.
+3.  **Proficiency Scoring**: `SCO` applies a weighted formula `(Gap * 0.6) + (Criticality * 0.4)` to determine priority areas.
+4.  **Synthesis**: `PLN` curates a multi-modal learning plan, mapping discovered gaps to specific industry resources.
 
-### AI & Orchestration
-*   **Groq (Llama 3.3 70B):** Used as the primary engine for **sub-500ms inference latency** during live interviews.
-*   **Google Gemini Flash:** Serving as the high-context fallback and document parser for multi-modal stability.
-*   **Pydantic V2:** Ensures **type-safe AI responses**. Every LLM output is validated against strict schemas before processing.
-
-### Data & Infrastructure
-*   **PyMuPDF & ReportLab:** Handling the extraction of raw PDF data and the generation of production-grade reports.
-*   **Loguru:** Structured, asynchronous logging for system observability.
-
----
-
-## 🔄 Workflow / Data Flow
-
-NeuralHire transforms unstructured text into a structured intelligence dossier through a 4-phase pipeline.
-
-```mermaid
-sequenceDiagram
-    participant U as Candidate
-    participant UI as Neural UI
-    participant A as Agent
-    participant AI as AI Engine (Groq/Gemini)
-
-    U->>UI: Upload JD & Resume
-    UI->>A: parse_documents()
-    A->>AI: Vectorize requirements & profile
-    AI-->>A: Structured JSON (Skills & Gaps)
-    
-    loop Intelligence Probe (3x per Skill)
-        A->>AI: get_next_question(history)
-        AI-->>A: Adaptive Question
-        A->>UI: Render Chat Bubble
-        U->>UI: Provide Technical Answer
-        UI->>A: process_answer()
-    end
-
-    A->>AI: generate_plan()
-    AI-->>A: Weekly Roadmap + Resources
-    A->>UI: Render Dashboard
-    UI->>U: Download PDF Report
-```
-
-1.  **Ingestion:** Raw PDF text is extracted and normalized.
-2.  **Mapping:** The AI identifies "claimed" vs "required" skills.
-3.  **Probing:** A targeted Q&A loop validates depth of knowledge.
-4.  **Synthesis:** Data is compiled into a 12-week learning masterplan.
+### Tech Stack
+*   **Core**: Python 3.12, Streamlit 1.56
+*   **AI**: Groq (Llama 3.3 70B), Google Gemini 1.5 Flash
+*   **Validation**: Pydantic V2 (Strict Schema Enforcement)
+*   **PDF Engine**: PyMuPDF, ReportLab (High-fidelity generation)
+*   **Observability**: Loguru (Structured async logging)
 
 ---
 
-## ✨ Features
+## 🧪 Demo / Intelligence Dashboard
 
-*   **⚡ Sub-Second Intelligence:** Powered by Groq for near-instant conversational feedback.
-*   **🔄 Multi-Key Resiliency:** Automatic rotation across 10+ API keys to bypass rate limits—production-ready uptime.
-*   **📊 Dynamic Skill Scoring:** Not just "Pass/Fail." Proficiency is scored 1-10 with qualitative reasoning.
-*   **🗺️ Personalized Roadmaps:** Week-by-week study plans including YouTube videos (Easy/Medium/Hard), Official Docs, and Hands-on Projects.
-*   **🎨 Cinematic Dark Mode:** A UI designed to "WOW" with animated orbs, glassmorphic cards, and pulsating glows.
-*   **📥 One-Click Export:** High-fidelity PDF reports that mirror the dashboard's premium design.
-
----
-
-## 📊 Performance & Metrics
-
-NeuralHire is optimized for speed and accuracy. Below are benchmarks from our internal testing:
-
-```mermaid
-graph LR
-    subgraph Latency [Response Time]
-        A[Groq Llama 3] --> B[420ms]
-        C[Gemini Flash] --> D[1.2s]
-    end
-    subgraph Accuracy [Parsing Precision]
-        E[Skill Extraction] --> F[94%]
-        G[Gap Analysis] --> H[89%]
-    end
-```
-
-| Metric | Target | Actual (Avg) |
-| :--- | :--- | :--- |
-| **Question Latency** | < 1.0s | **0.58s** |
-| **PDF Generation** | < 3.0s | **1.8s** |
-| **JSON Parse Success** | > 95% | **99.2%** |
-| **API Failover Time** | < 0.5s | **0.1s** |
-
----
-
-## 🧪 Demo / Screenshots
-
-![NeuralHire Dashboard Mockup](dashboard_mockup.png)
+![NeuralHire Dashboard](assets/dashboard_mockup.png)
 *The Intelligence Dashboard: A centralized view of candidate proficiency and their personalized learning journey.*
 
 ---
 
-## 🛠️ Installation & Setup
+## 🚀 Installation & Deployment
 
-### 1. Clone & Environment
-```bash
-git clone https://github.com/Saineelareddy/Catalyst_deccan_ai_snr.git
-cd Catalyst_deccan_ai_snr
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-```
+### Local Setup
+1. **Clone & Venv**:
+   ```bash
+   git clone https://github.com/Yashthakre-07/Catalyst_Yash_Thakre.git
+   cd Catalyst_Yash_Thakre
+   python -m venv venv
+   source venv/bin/activate # Windows: venv\Scripts\activate
+   ```
+2. **Install Dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. **Environment**: Create a `.env` file with your `GROQ_API_KEY` and `GEMINI_API_KEY`.
+4. **Launch**:
+   ```bash
+   streamlit run main.py
+   ```
 
-### 2. Dependencies
-```bash
-pip install -r requirements.txt
-```
-
-### 3. API Configuration
-Create a `.env` file from the example:
-```bash
-cp .env.example .env
-```
-Add your keys (the system supports rotation):
-```env
-GEMINI_API_KEY="key1"
-GEMINI_API_KEY1="key2"
-GROQ_API_KEY="key1"
-```
-
-### 4. Launch
-```bash
-streamlit run main.py
-```
-
----
-
-## 📂 Project Structure
-
-```text
-skill-assessment-agent/
-├── agent/                  # 🧠 Core AI logic (Assessor, Scorer, Planner)
-├── models/                 # 📐 Pydantic data schemas
-├── parsers/                # 🔍 Resume & JD intelligence
-├── utils/                  # 🔧 AI Client, PDF Generator, Loggers
-├── ui_styles.py            # 🎨 Neural Dark CSS System
-├── main.py                 # 🚀 Streamlit Entry Point
-└── results_dashboard.py    # 📊 Visualization Engine
-```
-
----
-
-## 🔐 API / Environment Variables
-
-| Variable | Type | Description |
-| :--- | :--- | :--- |
-| `GEMINI_API_KEY` | Secret | Primary key for Google Gemini Flash models. |
-| `GROQ_API_KEY` | Secret | Primary key for Llama 3.3 high-speed inference. |
-| `MAX_QUESTIONS` | Config | Sets the depth of the intelligence probe (Default: 3). |
-| `AI_PROVIDER` | Config | Selects primary provider (`groq` or `gemini`). |
-
----
-
-## 🚀 Deployment
-
-NeuralHire is optimized for **Streamlit Cloud** and **Docker**:
-
-1.  **Streamlit Cloud:** Connect your GitHub repo, add Secrets in the dashboard, and deploy.
-2.  **Docker:**
-    ```bash
-    docker build -t neuralhire .
-    docker run -p 8501:8501 --env-file .env neuralhire
-    ```
-
----
-
-## 📈 Future Improvements
-
-*   **Multi-Agent Collaborative Assessment:** Different LLM agents specialized in Coding, System Design, and Behavioral analysis.
-*   **Direct Video Interviewing:** Integration with WebRTC for real-time video sentiment analysis.
-*   **Enterprise SSO:** Integration with Okta/Azure AD for corporate hiring teams.
-*   **Dynamic Resource API:** Real-time fetching of course coupons from Udemy/Coursera APIs.
-
----
-
-## 🤝 Contributing
-
-Contributions are what make the open-source community an amazing place to learn, inspire, and create. 
-
-1.  Fork the Project
-2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4.  Push to the Branch (`git push origin feature/AmazingFeature`)
-5.  Open a Pull Request
+### Production Deployment
+NeuralHire is optimized for **Streamlit Cloud** and **Docker**. The `AIClient` is designed to be **Stateless and Robust**, perfectly suited for serverless deployment.
 
 ---
 
 <p align="center">
-  <b>NeuralHire</b> • Built with 💜 for the next generation of engineers.
+  <b>NeuralHire</b> • Engineered for the Future of Talent Acquisition.
 </p>
