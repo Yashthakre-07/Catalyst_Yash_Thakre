@@ -334,6 +334,7 @@ elif st.session_state.phase == "results":
         # ── PDF Download Button ──
         c1, c2 = st.columns([1, 4])
         with c1:
+            pdf_buffer = generate_plan_pdf(plan)
             st.download_button(
                 label="◈ DOWNLOAD PDF REPORT",
                 data=pdf_buffer,
