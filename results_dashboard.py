@@ -223,7 +223,7 @@ def _block1_header(plan: LearningPlan, assessments: list[SkillAssessment]):
             <h1 style="margin:0; font-size: 84px; font-weight: 800; line-height: 0.9; letter-spacing: -0.04em; background: linear-gradient(135deg, #FFF 0%, #A78BFA 50%, #10B981 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{name}</h1>
             <div style="color: {C_MUTED}; font-weight: 600; font-size: 20px; margin-top: 1rem;">Targeting: <span style="color: {C_STRONG}; font-weight: 800;">{role}</span></div>
             
-            <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 4rem;">
+            <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; margin-top: 4rem;">
                 <div class="metric-pill"><div class="metric-value">{weeks}w</div><div class="metric-label">Roadmap</div></div>
                 <div class="metric-pill"><div class="metric-value">{n_skills}</div><div class="metric-label">Nodes</div></div>
                 <div class="metric-pill"><div class="metric-value" style="background:linear-gradient(to bottom, #F43F5E, #E11D48); -webkit-background-clip:text;">{gaps}</div><div class="metric-label">Gaps</div></div>
