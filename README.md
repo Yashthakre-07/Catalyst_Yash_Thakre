@@ -10,8 +10,6 @@
 
 ### *The future of precision hiring. Real-time intelligence probes, automated skill-gap analysis, and cinematic learning roadmaps.*
 
-**Live Deployment:** [https://catalyst-yt.streamlit.app/](https://catalyst-yt.streamlit.app/)
-
 ---
 
 ## 📌 Problem Statement
@@ -35,7 +33,6 @@ Unlike simple "matching" algorithms, NeuralHire acts as an **Autonomous Intervie
 1.  **Adaptive Intelligence:** Questions evolve based on previous answers. It probes deep into claimed expertise.
 2.  **The "Bridge" Philosophy:** It doesn't just reject; it **diagnoses**. If a candidate has a gap, it builds the bridge to cross it.
 3.  **Neural Dark UI:** A premium, cinematic interface that turns a stressful assessment into an immersive experience.
-4.  **Instant Demo Mode:** One-click evaluation using pre-configured sample data (JD + Resume) to experience the full pipeline instantly.
 
 ---
 
@@ -176,7 +173,7 @@ graph LR
 
 ## 🧪 Demo / Screenshots
 
-![NeuralHire Dashboard Mockup](assets/dashboard_mockup.png)
+![NeuralHire Dashboard Mockup](dashboard_mockup.png)
 *The Intelligence Dashboard: A centralized view of candidate proficiency and their personalized learning journey.*
 
 ---
@@ -232,13 +229,10 @@ skill-assessment-agent/
 
 ## 🔐 API / Environment Variables
 
-The system features an **Autonomous Key Rotation** engine. It scans for primary keys and indexed fallbacks (up to 10 keys per provider) to ensure high availability and bypass rate limits.
-
 | Variable | Type | Description |
 | :--- | :--- | :--- |
-| `GEMINI_API_KEY` | Secret | Primary Gemini Flash key. Fallbacks: `GEMINI_API_KEY1`, `GEMINI_API_KEY2`... |
-| `GROQ_API_KEY` | Secret | Primary Groq Llama 3 key. Fallbacks: `GROQ_API_KEY1`, `GROQ_API_KEY2`... |
-| `NVIDIA_API_KEY` | Secret | Optional fallback for NVIDIA NIM microservices. |
+| `GEMINI_API_KEY` | Secret | Primary key for Google Gemini Flash models. |
+| `GROQ_API_KEY` | Secret | Primary key for Llama 3.3 high-speed inference. |
 | `MAX_QUESTIONS` | Config | Sets the depth of the intelligence probe (Default: 3). |
 | `AI_PROVIDER` | Config | Selects primary provider (`groq` or `gemini`). |
 

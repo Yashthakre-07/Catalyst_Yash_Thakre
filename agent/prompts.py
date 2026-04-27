@@ -1,40 +1,36 @@
 SKILL_EXTRACTOR_PROMPT = """
-You are a Staff Engineer at a top-tier tech firm. Extract the CORE technical skills and metadata from this Job Description.
+You are a Staff Engineer tasked with extracting required skills and job metadata from a Job Description.
 
 Job Description:
 __JD_TEXT__
 
-STRICT RULES:
-1. Extract exactly 5-8 of the most critical technical skills.
-2. DO NOT extract "Job Description Analysis", "Soft Skills", or any meta-tasks about this assessment.
-3. For senior roles (Staff, Lead, Principal), focus on architecture, system design, leadership, and specialized technologies over basic languages.
-4. Ensure the "required_level" reflects the seniority of the role (e.g., Staff Engineers should have 8-10 in core areas).
-
-Output a JSON object with:
-- "target_role" (string)
-- "years_experience_required" (int)
-- "company_context" (string)
-- "skills" (array): [{"skill_name", "required_level", "is_required", "context"}]
+Extract the required skills and output them as a JSON object with:
+- "target_role" (string): The title of the role.
+- "years_experience_required" (int): Minimum years of experience if mentioned, else 0.
+- "company_context" (string): Brief context about the company or team.
+- "skills" (array): A list of objects, each containing:
+    - "skill_name" (string): Standard name.
+    - "required_level" (int): 1-10.
+    - "is_required" (bool): True if essential.
+    - "context" (string): Why it's needed.
 
 Respond ONLY in valid JSON.
 """
 
 RESUME_PARSER_PROMPT = """
-Extract the candidate's professional identity and skill proficiency from the following resume text.
+Extract candidate information and skill proficiency estimates from the following resume text.
 
 Resume Text:
 __RESUME_TEXT__
 
-CRITICAL: Find the candidate's full name. If it's not explicitly labeled, look for the largest text at the very top. DO NOT use "Not Available" or "Unknown" unless it is absolutely missing.
-
-Output a JSON object:
+Output a JSON object matching this structure:
 {
-  "name": "Full Name",
-  "current_role": "Recent Title",
+  "name": "Candidate Full Name",
+  "current_role": "Most recent role title",
   "years_experience": 0,
   "summary": "Brief professional summary",
   "skills_from_resume": [
-    {"name": "Skill Name", "estimated_level": 1-10}
+    {"name": "skill_name", "estimated_level": 1-10}
   ]
 }
 
