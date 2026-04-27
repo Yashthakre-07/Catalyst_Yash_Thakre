@@ -81,9 +81,19 @@ if st.session_state.phase == "hero":
     st.markdown('<div class="hero-full"><div class="hero-badge"><div class="dot"></div>Neural Sync Active</div><h1 class="hero-title-god">Neural<br><span>Hire.</span></h1><p class="hero-subtitle-god">Autonomous skill assessment engine.</p></div>', unsafe_allow_html=True)
     _, c, _ = st.columns([1, 0.4, 1])
     with c:
-        if st.button("Initiate Scan", key="hero_btn"):
+        if st.button("Initiate Scan", key="hero_btn", width="stretch"):
             st.session_state.phase = "step_jd"
             st.rerun()
+        if st.button("◈ Try Demo Mode", key="hero_demo", width="stretch"):
+            try:
+                with open("data/sample_jd.txt", "r") as f:
+                    st.session_state.jd_text = f.read()
+                with open("data/sample_resume.txt", "r") as f:
+                    st.session_state.resume_text = f.read()
+                st.session_state.phase = "processing_resume"
+                st.rerun()
+            except Exception as e:
+                st.error(f"Demo failure: {e}")
 
 # ══════════════════════════════════════════════════════
 # PHASE: JD UPLOAD
@@ -103,11 +113,26 @@ elif st.session_state.phase == "step_jd":
             if jd_file: jd_input = extract_text_from_pdf(jd_file.read())
 
         st.markdown("<div style='margin-top:1.25rem;'>", unsafe_allow_html=True)
-        if st.button("Analyze Requirement", key="jd_next", width="stretch"):
-            if jd_input and jd_input.strip():
-                st.session_state.jd_text = jd_input
-                st.session_state.phase = "processing_jd"
-                st.rerun()
+        c_demo, c_next = st.columns([1, 1])
+        with c_demo:
+            if st.button("◈ LOAD DEMO PAYLOAD", key="jd_demo", width="stretch"):
+                try:
+                    with open("data/sample_jd.txt", "r") as f:
+                        st.session_state.jd_text = f.read()
+                    with open("data/sample_resume.txt", "r") as f:
+                        st.session_state.resume_text = f.read()
+                    st.session_state.phase = "processing_resume"
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Failed to load demo data: {e}")
+        with c_next:
+            if st.button("Analyze Requirement →", key="jd_next", width="stretch"):
+                if jd_input and jd_input.strip():
+                    st.session_state.jd_text = jd_input
+                    st.session_state.phase = "processing_jd"
+                    st.rerun()
+                else:
+                    st.warning("Please provide a Job Description or load demo data.")
         st.markdown("</div>", unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════

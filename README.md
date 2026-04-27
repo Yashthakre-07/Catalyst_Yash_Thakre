@@ -33,6 +33,7 @@ Unlike simple "matching" algorithms, NeuralHire acts as an **Autonomous Intervie
 1.  **Adaptive Intelligence:** Questions evolve based on previous answers. It probes deep into claimed expertise.
 2.  **The "Bridge" Philosophy:** It doesn't just reject; it **diagnoses**. If a candidate has a gap, it builds the bridge to cross it.
 3.  **Neural Dark UI:** A premium, cinematic interface that turns a stressful assessment into an immersive experience.
+4.  **Instant Demo Mode:** One-click evaluation using pre-configured sample data (JD + Resume) to experience the full pipeline instantly.
 
 ---
 
@@ -173,7 +174,7 @@ graph LR
 
 ## 🧪 Demo / Screenshots
 
-![NeuralHire Dashboard Mockup](dashboard_mockup.png)
+![NeuralHire Dashboard Mockup](assets/dashboard_mockup.png)
 *The Intelligence Dashboard: A centralized view of candidate proficiency and their personalized learning journey.*
 
 ---
