@@ -52,11 +52,16 @@ class AIClient:
         st_secrets = {}
         try:
             import streamlit as st
-            try:
-                # We try to convert to dict to trigger the parse early and catch any errors
-                st_secrets = dict(st.secrets)
-            except:
-                st_secrets = {}
+            # Use getattr to avoid triggering the proxy if it doesn't exist
+            secrets_obj = getattr(st, "secrets", None)
+            if secrets_obj is not None:
+                try:
+                    # Only try to convert to dict if it's not going to raise an error
+                    # If it's a Secrets object, we can iterate or convert
+                    st_secrets = dict(secrets_obj)
+                except:
+                    # If dict conversion fails, it might be the error we're looking for
+                    st_secrets = {}
         except:
             st_secrets = {}
 
