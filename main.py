@@ -78,7 +78,7 @@ def trigger_first_question():
 # PHASE: HERO
 # ══════════════════════════════════════════════════════
 if st.session_state.phase == "hero":
-    st.markdown('<div class="hero-full"><div class="hero-badge"><div class="dot"></div>Neural Sync Active</div><h1 class="hero-title-god">Neural<br><span>Hire.</span></h1><p class="hero-subtitle-god" style="font-size:18px;">Autonomous skill assessment engine.</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="hero-full"><div class="hero-badge"><div class="dot"></div>Neural Sync Active</div><h1 class="hero-title-god">Neural<br><span>Hire.</span></h1><p class="hero-subtitle-god">Autonomous skill assessment engine.</p></div>', unsafe_allow_html=True)
     _, c, _ = st.columns([1, 0.4, 1])
     with c:
         if st.button("Initiate Scan", key="hero_btn"):

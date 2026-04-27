@@ -64,11 +64,75 @@ html, body, [class*="css"], .stApp {
 .nav-label.active { color: var(--accent-light); text-shadow: 0 0 10px var(--accent-glow); }
 
 /* HERO - BREATHTAKING */
-.hero-title-god { font-size: 140px !important; font-weight: 800 !important; line-height: 0.85 !important; letter-spacing: -0.05em !important; margin-bottom: 2rem; color: #FFFFFF; }
+.hero-full {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4rem 0 2rem;
+}
+
+.hero-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(124, 106, 247, 0.1);
+    border: 1px solid rgba(124, 106, 247, 0.2);
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--accent-light);
+    margin-bottom: 2rem;
+    animation: fadeInDown 1s ease-out;
+}
+
+.hero-badge .dot {
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--accent);
+    animation: pulse 2s infinite;
+}
+
+.hero-title-god { 
+    font-size: 140px !important; 
+    font-weight: 800 !important; 
+    line-height: 0.85 !important; 
+    letter-spacing: -0.05em !important; 
+    margin-bottom: 2rem; 
+    color: #FFFFFF; 
+    text-align: center;
+}
+
 .hero-title-god span { 
     background: linear-gradient(135deg, #FFF 0%, #A78BFA 50%, #10B981 100%); 
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
     filter: drop-shadow(0 0 30px rgba(124, 106, 247, 0.4));
+}
+
+.hero-subtitle-god {
+    font-size: 20px !important;
+    color: var(--text-muted) !important;
+    max-width: 600px;
+    margin: 0 auto 3rem;
+    line-height: 1.6;
+    text-align: center;
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.5); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
 }
 
 /* GOD LEVEL GLASS CARD */
